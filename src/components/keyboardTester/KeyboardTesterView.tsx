@@ -319,35 +319,35 @@ Browser Environment: ${navigator.userAgent.slice(0, 80)}`;
     <div className="w-full max-w-6xl mx-auto py-6 px-4 animate-fadeIn">
       
       {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-200 dark:border-slate-800">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-[#E5E5E5] dark:border-[#2A2A2A]">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-500 border border-cyan-500/20">
+            <div className="p-2 rounded-xl bg-[#FF5A00]/10 text-[#FF5A00] border border-[#FF5A00]/20">
               <Keyboard className="w-5 h-5" />
             </div>
-            <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white font-mono tracking-tight">
+            <h1 className="text-2xl font-extrabold text-[#111111] dark:text-[#F5F5F5] font-mono tracking-tight">
               PRO KEYBOARD TESTER
             </h1>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30 uppercase font-mono">
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#FF5A00]/10 text-[#FF5A00] border border-[#FF5A00]/30 uppercase font-mono">
               Hardware Diagnostic
             </span>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          <p className="text-xs text-[#6B6B6B] dark:text-[#A1A1AA]">
             Real-time physical key detection, n-key rollover analysis, anti-ghosting matrix evaluation, and timing diagnostics.
           </p>
         </div>
 
         {/* Layout Selector */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-mono text-slate-400">Layout:</span>
+          <span className="text-xs font-mono text-[#6B6B6B] dark:text-[#A1A1AA]">Layout:</span>
           {(['full', 'tkl', '75', '65', '60'] as KeyboardLayoutType[]).map((l) => (
             <button
               key={l}
               onClick={() => setLayout(l)}
               className={`px-2.5 py-1 text-xs font-mono font-bold rounded-lg border transition-all ${
                 layout === l
-                  ? 'bg-cyan-500/15 border-cyan-500 text-cyan-600 dark:text-cyan-400 shadow-sm'
-                  : 'bg-slate-100 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:text-white'
+                  ? 'bg-[#FF5A00]/15 border-[#FF5A00] text-[#FF5A00] shadow-sm'
+                  : 'bg-[#F7F7F7] dark:bg-[#161616] border-[#E5E5E5] dark:border-[#2A2A2A] text-[#6B6B6B] dark:text-[#A1A1AA] hover:text-[#111111] dark:hover:text-white'
               }`}
             >
               {l.toUpperCase()}
@@ -358,75 +358,75 @@ Browser Environment: ${navigator.userAgent.slice(0, 80)}`;
 
       {/* Top Quick Metrics HUD */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 font-mono">
-        <div className="bg-white dark:bg-[#0f172a]/90 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-sm">
-          <div className="text-xs text-slate-500 mb-1 flex items-center justify-between">
+        <div className="bg-white dark:bg-[#111111] border border-[#E5E5E5] dark:border-[#2A2A2A] rounded-2xl p-3.5 shadow-sm">
+          <div className="text-xs text-[#6B6B6B] dark:text-[#71717A] mb-1 flex items-center justify-between">
             <span>KEYS TESTED</span>
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+            <CheckCircle2 className="w-3.5 h-3.5 text-[#FF5A00]" />
           </div>
-          <div className="text-2xl font-extrabold text-slate-900 dark:text-white">
-            {testedCount} <span className="text-xs text-slate-400 font-normal">/ {totalVisible}</span>
+          <div className="text-2xl font-extrabold text-[#111111] dark:text-white">
+            {testedCount} <span className="text-xs text-[#6B6B6B] dark:text-[#71717A] font-normal">/ {totalVisible}</span>
           </div>
-          <div className="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
-            <div className="bg-cyan-400 h-full transition-all duration-200" style={{ width: `${progressPercent}%` }} />
+          <div className="w-full bg-[#E5E5E5] dark:bg-[#2A2A2A] h-1.5 rounded-full mt-2 overflow-hidden">
+            <div className="bg-[#FF5A00] h-full transition-all duration-200" style={{ width: `${progressPercent}%` }} />
           </div>
         </div>
 
-        <div className="bg-white dark:bg-[#0f172a]/90 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-sm">
-          <div className="text-xs text-slate-500 mb-1 flex items-center justify-between">
+        <div className="bg-white dark:bg-[#111111] border border-[#E5E5E5] dark:border-[#2A2A2A] rounded-2xl p-3.5 shadow-sm">
+          <div className="text-xs text-[#6B6B6B] dark:text-[#71717A] mb-1 flex items-center justify-between">
             <span>HELD INPUTS</span>
-            <Activity className="w-3.5 h-3.5 text-cyan-500" />
+            <Activity className="w-3.5 h-3.5 text-[#FF5A00]" />
           </div>
-          <div className="text-2xl font-extrabold text-cyan-600 dark:text-cyan-400">
-            {currentlyHeldKeys.size} <span className="text-xs text-slate-400 font-normal">active</span>
+          <div className="text-2xl font-extrabold text-[#FF5A00] glow-orange">
+            {currentlyHeldKeys.size} <span className="text-xs text-[#6B6B6B] dark:text-[#71717A] font-normal">active</span>
           </div>
-          <div className="text-[10px] text-slate-400 truncate mt-1">
+          <div className="text-[10px] text-[#6B6B6B] dark:text-[#71717A] truncate mt-1">
             {Array.from(currentlyHeldKeys).slice(0, 4).join(', ') || 'No active inputs'}
           </div>
         </div>
 
-        <div className="bg-white dark:bg-[#0f172a]/90 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-sm">
-          <div className="text-xs text-slate-500 mb-1 flex items-center justify-between">
+        <div className="bg-white dark:bg-[#111111] border border-[#E5E5E5] dark:border-[#2A2A2A] rounded-2xl p-3.5 shadow-sm">
+          <div className="text-xs text-[#6B6B6B] dark:text-[#71717A] mb-1 flex items-center justify-between">
             <span>MAX OBSERVED ROLLOVER</span>
-            <Zap className="w-3.5 h-3.5 text-amber-500" />
+            <Zap className="w-3.5 h-3.5 text-[#FF6E1A]" />
           </div>
-          <div className="text-2xl font-extrabold text-slate-900 dark:text-white">
-            {maxRollover} <span className="text-xs text-slate-400 font-normal">keys simultaneous</span>
+          <div className="text-2xl font-extrabold text-[#111111] dark:text-white">
+            {maxRollover} <span className="text-xs text-[#6B6B6B] dark:text-[#71717A] font-normal">keys simultaneous</span>
           </div>
-          <div className="text-[10px] text-slate-400 mt-1">
+          <div className="text-[10px] text-[#6B6B6B] dark:text-[#71717A] mt-1">
             Browser simultaneous input buffer
           </div>
         </div>
 
-        <div className="bg-white dark:bg-[#0f172a]/90 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-sm">
-          <div className="text-xs text-slate-500 mb-1 flex items-center justify-between">
+        <div className="bg-white dark:bg-[#111111] border border-[#E5E5E5] dark:border-[#2A2A2A] rounded-2xl p-3.5 shadow-sm">
+          <div className="text-xs text-[#6B6B6B] dark:text-[#71717A] mb-1 flex items-center justify-between">
             <span>DIAGNOSTIC STATUS</span>
-            <Clock className="w-3.5 h-3.5 text-slate-400" />
+            <Clock className="w-3.5 h-3.5 text-[#6B6B6B] dark:text-[#71717A]" />
           </div>
-          <div className="text-lg font-bold text-emerald-500 truncate mt-1">
+          <div className="text-lg font-bold text-[#FF5A00] truncate mt-1">
             {progressPercent === 100 ? 'TEST COMPLETE' : 'DIAGNOSTIC ACTIVE'}
           </div>
-          <div className="text-[10px] text-slate-400 mt-1">
+          <div className="text-[10px] text-[#6B6B6B] dark:text-[#71717A] mt-1">
             {currentlyHeldKeys.size > 0 ? 'Detecting inputs...' : 'Press physical keys'}
           </div>
         </div>
       </div>
 
       {/* Main Interactive Diagnostic Keyboard Layout */}
-      <div className="w-full bg-slate-950 p-6 rounded-2xl border border-slate-800 shadow-2xl overflow-x-auto select-none mb-6">
+      <div className="w-full bg-white dark:bg-[#111111] p-6 rounded-2xl border border-[#E5E5E5] dark:border-[#2A2A2A] shadow-2xl overflow-x-auto select-none mb-6">
         
         {/* Controls Bar above Keyboard */}
-        <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-800/80 text-xs font-mono">
-          <div className="flex items-center gap-4 text-slate-400">
+        <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#E5E5E5] dark:border-[#2A2A2A] text-xs font-mono">
+          <div className="flex items-center gap-4 text-[#6B6B6B] dark:text-[#A1A1AA]">
             <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded bg-slate-800 border border-slate-700 inline-block" />
+              <span className="w-3 h-3 rounded bg-[#F7F7F7] dark:bg-[#161616] border border-[#E5E5E5] dark:border-[#2A2A2A] inline-block" />
               Untested
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded bg-cyan-400 text-black inline-block shadow-sm shadow-cyan-400" />
+              <span className="w-3 h-3 rounded bg-[#FF5A00] text-black inline-block shadow-sm shadow-[#FF5A00]/40" />
               Pressed
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded bg-emerald-500/20 border border-emerald-500/60 inline-block" />
+              <span className="w-3 h-3 rounded bg-[#FF6E1A]/20 border border-[#FF6E1A]/60 inline-block" />
               Tested
             </span>
           </div>
@@ -434,14 +434,14 @@ Browser Environment: ${navigator.userAgent.slice(0, 80)}`;
           <div className="flex items-center gap-2">
             <button
               onClick={handleReleaseAll}
-              className="px-3 py-1.5 rounded-lg text-xs font-mono text-slate-400 hover:text-white bg-slate-900 border border-slate-800 hover:border-slate-700 transition-colors"
+              className="px-3 py-1.5 rounded-lg text-xs font-mono text-[#6B6B6B] dark:text-[#A1A1AA] hover:text-[#111111] dark:hover:text-white bg-[#F7F7F7] dark:bg-[#161616] border border-[#E5E5E5] dark:border-[#2A2A2A] hover:border-[#FF5A00]/40 transition-colors"
               title="Release stuck inputs"
             >
               Release All Keys
             </button>
             <button
               onClick={handleReset}
-              className="px-3 py-1.5 rounded-lg text-xs font-mono text-rose-400 hover:text-rose-300 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition-colors flex items-center gap-1"
+              className="px-3 py-1.5 rounded-lg text-xs font-mono text-[#FF3B5C] bg-[#FF3B5C]/10 border border-[#FF3B5C]/30 hover:bg-[#FF3B5C]/20 transition-colors flex items-center gap-1 font-bold"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               Reset Test
@@ -463,14 +463,14 @@ Browser Environment: ${navigator.userAgent.slice(0, 80)}`;
                   const isTested = state?.status === 'tested';
                   const isStuck = state?.status === 'stuck';
 
-                  let keyColor = 'bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700';
+                  let keyColor = 'bg-[#F7F7F7] dark:bg-[#161616] border-[#E5E5E5] dark:border-[#2A2A2A] text-[#111111] dark:text-white hover:border-[#FF5A00]/40';
 
                   if (isHeld) {
-                    keyColor = 'bg-cyan-400 text-slate-950 font-bold border-cyan-300 shadow-lg shadow-cyan-500/50 scale-[0.97]';
+                    keyColor = 'bg-[#FF5A00] text-black font-black border-[#FF5A00] shadow-lg shadow-[#FF5A00]/40 scale-[0.97]';
                   } else if (isStuck) {
-                    keyColor = 'bg-rose-500/20 border-rose-500 text-rose-400 animate-pulse';
+                    keyColor = 'bg-[#FF3B5C]/20 border-[#FF3B5C] text-[#FF3B5C] animate-pulse font-bold';
                   } else if (isTested) {
-                    keyColor = 'bg-emerald-500/15 border-emerald-500/50 text-emerald-400';
+                    keyColor = 'bg-[#FF6E1A]/15 border-[#FF6E1A]/50 text-[#FF6E1A] font-bold';
                   }
 
                   const widthClass = k.width || 'w-10';
@@ -479,7 +479,7 @@ Browser Environment: ${navigator.userAgent.slice(0, 80)}`;
                     <div
                       key={k.code}
                       onClick={() => state && setSelectedKey(state)}
-                      className={`h-10 ${widthClass} rounded-lg border flex flex-col items-center justify-center font-mono transition-all duration-75 cursor-pointer select-none p-1 ${keyColor}`}
+                      className={`h-10 ${widthClass} rounded-md border flex flex-col items-center justify-center font-mono transition-all duration-75 cursor-pointer select-none p-1 ${keyColor}`}
                     >
                       <span className="text-[11px] font-semibold leading-none">{k.label}</span>
                       {k.subLabel && (
@@ -495,13 +495,13 @@ Browser Environment: ${navigator.userAgent.slice(0, 80)}`;
       </div>
 
       {/* Diagnostic Tabs */}
-      <div className="flex border-b border-slate-200 dark:border-slate-800 mb-6 font-mono text-xs">
+      <div className="flex border-b border-[#E5E5E5] dark:border-[#2A2A2A] mb-6 font-mono text-xs">
         <button
           onClick={() => setActiveTab('tester')}
           className={`px-4 py-2.5 font-bold border-b-2 transition-all ${
             activeTab === 'tester'
-              ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400'
-              : 'border-transparent text-slate-500 hover:text-slate-300'
+              ? 'border-[#FF5A00] text-[#FF5A00]'
+              : 'border-transparent text-[#6B6B6B] dark:text-[#A1A1AA] hover:text-[#111111] dark:hover:text-white'
           }`}
         >
           Event Inspector
@@ -510,8 +510,8 @@ Browser Environment: ${navigator.userAgent.slice(0, 80)}`;
           onClick={() => setActiveTab('rollover')}
           className={`px-4 py-2.5 font-bold border-b-2 transition-all ${
             activeTab === 'rollover'
-              ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400'
-              : 'border-transparent text-slate-500 hover:text-slate-300'
+              ? 'border-[#FF5A00] text-[#FF5A00]'
+              : 'border-transparent text-[#6B6B6B] dark:text-[#A1A1AA] hover:text-[#111111] dark:hover:text-white'
           }`}
         >
           Rollover Test
@@ -520,8 +520,8 @@ Browser Environment: ${navigator.userAgent.slice(0, 80)}`;
           onClick={() => setActiveTab('ghosting')}
           className={`px-4 py-2.5 font-bold border-b-2 transition-all ${
             activeTab === 'ghosting'
-              ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400'
-              : 'border-transparent text-slate-500 hover:text-slate-300'
+              ? 'border-[#FF5A00] text-[#FF5A00]'
+              : 'border-transparent text-[#6B6B6B] dark:text-[#A1A1AA] hover:text-[#111111] dark:hover:text-white'
           }`}
         >
           Anti-Ghosting Matrix
@@ -530,8 +530,8 @@ Browser Environment: ${navigator.userAgent.slice(0, 80)}`;
           onClick={() => setActiveTab('report')}
           className={`px-4 py-2.5 font-bold border-b-2 transition-all ${
             activeTab === 'report'
-              ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400'
-              : 'border-transparent text-slate-500 hover:text-slate-300'
+              ? 'border-[#FF5A00] text-[#FF5A00]'
+              : 'border-transparent text-[#6B6B6B] dark:text-[#A1A1AA] hover:text-[#111111] dark:hover:text-white'
           }`}
         >
           Health Report
@@ -541,54 +541,54 @@ Browser Environment: ${navigator.userAgent.slice(0, 80)}`;
       {/* TAB 1: EVENT INSPECTOR */}
       {activeTab === 'tester' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono">
-          <div className="bg-white dark:bg-[#0f172a]/90 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
-            <h3 className="text-xs font-bold uppercase text-slate-400 mb-3 flex items-center gap-2">
-              <Activity className="w-4 h-4 text-cyan-500" />
+          <div className="bg-white dark:bg-[#111111] border border-[#E5E5E5] dark:border-[#2A2A2A] rounded-2xl p-5 shadow-sm">
+            <h3 className="text-xs font-bold uppercase text-[#6B6B6B] dark:text-[#A1A1AA] mb-3 flex items-center gap-2">
+              <Activity className="w-4 h-4 text-[#FF5A00]" />
               Live Keyboard Event Stream
             </h3>
             {lastEvent ? (
               <div className="space-y-2 text-xs">
-                <div className="flex justify-between py-1.5 border-b border-slate-100 dark:border-slate-800">
-                  <span className="text-slate-500">Key Identifier:</span>
-                  <span className="font-bold text-slate-900 dark:text-white">{lastEvent.key}</span>
+                <div className="flex justify-between py-1.5 border-b border-[#E5E5E5] dark:border-[#2A2A2A]">
+                  <span className="text-[#6B6B6B] dark:text-[#71717A]">Key Identifier:</span>
+                  <span className="font-bold text-[#111111] dark:text-white">{lastEvent.key}</span>
                 </div>
-                <div className="flex justify-between py-1.5 border-b border-slate-100 dark:border-slate-800">
-                  <span className="text-slate-500">DOM Event Code:</span>
-                  <span className="font-bold text-cyan-500">{lastEvent.code}</span>
+                <div className="flex justify-between py-1.5 border-b border-[#E5E5E5] dark:border-[#2A2A2A]">
+                  <span className="text-[#6B6B6B] dark:text-[#71717A]">DOM Event Code:</span>
+                  <span className="font-bold text-[#FF5A00]">{lastEvent.code}</span>
                 </div>
-                <div className="flex justify-between py-1.5 border-b border-slate-100 dark:border-slate-800">
-                  <span className="text-slate-500">Key Location:</span>
-                  <span className="text-slate-700 dark:text-slate-300">{lastEvent.location}</span>
+                <div className="flex justify-between py-1.5 border-b border-[#E5E5E5] dark:border-[#2A2A2A]">
+                  <span className="text-[#6B6B6B] dark:text-[#71717A]">Key Location:</span>
+                  <span className="text-[#111111] dark:text-white">{lastEvent.location}</span>
                 </div>
                 <div className="flex justify-between py-1.5">
-                  <span className="text-slate-500">Timestamp:</span>
-                  <span className="text-slate-400">{lastEvent.time}</span>
+                  <span className="text-[#6B6B6B] dark:text-[#71717A]">Timestamp:</span>
+                  <span className="text-[#6B6B6B] dark:text-[#A1A1AA]">{lastEvent.time}</span>
                 </div>
               </div>
             ) : (
-              <div className="py-8 text-center text-xs text-slate-400">
+              <div className="py-8 text-center text-xs text-[#6B6B6B] dark:text-[#71717A]">
                 Press any physical key on your keyboard to inspect its raw browser event signature.
               </div>
             )}
           </div>
 
-          <div className="bg-white dark:bg-[#0f172a]/90 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
-            <h3 className="text-xs font-bold uppercase text-slate-400 mb-3 flex items-center gap-2">
-              <Clock className="w-4 h-4 text-amber-500" />
+          <div className="bg-white dark:bg-[#111111] border border-[#E5E5E5] dark:border-[#2A2A2A] rounded-2xl p-5 shadow-sm">
+            <h3 className="text-xs font-bold uppercase text-[#6B6B6B] dark:text-[#A1A1AA] mb-3 flex items-center gap-2">
+              <Clock className="w-4 h-4 text-[#FF6E1A]" />
               Key Hold Duration & Response Timing
             </h3>
             {selectedKey?.pressDurationMs !== undefined ? (
               <div>
                 <div className="flex items-baseline gap-2 my-2">
-                  <span className="text-4xl font-extrabold text-amber-500">{selectedKey.pressDurationMs}</span>
-                  <span className="text-sm text-slate-400 font-sans">milliseconds hold duration</span>
+                  <span className="text-4xl font-extrabold text-[#FF6E1A]">{selectedKey.pressDurationMs}</span>
+                  <span className="text-sm text-[#6B6B6B] dark:text-[#A1A1AA] font-sans">milliseconds hold duration</span>
                 </div>
-                <p className="text-[11px] text-slate-500 mt-2">
-                  Observed delta between browser <code className="text-cyan-400">keydown</code> and <code className="text-cyan-400">keyup</code> events for <strong>{selectedKey.code}</strong>.
+                <p className="text-[11px] text-[#6B6B6B] dark:text-[#71717A] mt-2">
+                  Observed delta between browser <code className="text-[#FF5A00]">keydown</code> and <code className="text-[#FF5A00]">keyup</code> events for <strong>{selectedKey.code}</strong>.
                 </p>
               </div>
             ) : (
-              <div className="py-8 text-center text-xs text-slate-400">
+              <div className="py-8 text-center text-xs text-[#6B6B6B] dark:text-[#71717A]">
                 Click any tested key above or press and release a key to measure hold duration.
               </div>
             )}
@@ -598,77 +598,77 @@ Browser Environment: ${navigator.userAgent.slice(0, 80)}`;
 
       {/* TAB 2: ROLLOVER TEST */}
       {activeTab === 'rollover' && (
-        <div className="bg-white dark:bg-[#0f172a]/90 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm font-mono">
+        <div className="bg-white dark:bg-[#111111] border border-[#E5E5E5] dark:border-[#2A2A2A] rounded-2xl p-6 shadow-sm font-mono">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase">Simultaneous Key Rollover Diagnostic</h3>
-              <p className="text-xs text-slate-500 font-sans mt-0.5">
+              <h3 className="text-sm font-bold text-[#111111] dark:text-white uppercase">Simultaneous Key Rollover Diagnostic</h3>
+              <p className="text-xs text-[#6B6B6B] dark:text-[#A1A1AA] font-sans mt-0.5">
                 Press multiple physical keys simultaneously to measure how many concurrent inputs your browser detects.
               </p>
             </div>
-            <span className="text-3xl font-extrabold text-cyan-500">{currentlyHeldKeys.size} Active</span>
+            <span className="text-3xl font-extrabold text-[#FF5A00] glow-orange">{currentlyHeldKeys.size} Active</span>
           </div>
 
-          <div className="p-4 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl mb-4">
-            <span className="text-xs text-slate-400 block mb-2">KEYS CURRENTLY HELD:</span>
+          <div className="p-4 bg-[#F7F7F7] dark:bg-[#161616] border border-[#E5E5E5] dark:border-[#2A2A2A] rounded-xl mb-4">
+            <span className="text-xs text-[#6B6B6B] dark:text-[#71717A] block mb-2">KEYS CURRENTLY HELD:</span>
             <div className="flex flex-wrap gap-2">
               {currentlyHeldKeys.size > 0 ? (
                 Array.from(currentlyHeldKeys).map((code) => (
-                  <span key={code} className="px-3 py-1 rounded bg-cyan-500 text-slate-950 font-bold text-xs">
+                  <span key={code} className="px-3 py-1 rounded-md bg-[#FF5A00] text-black font-bold text-xs">
                     {code}
                   </span>
                 ))
               ) : (
-                <span className="text-xs text-slate-500 italic">No keys currently depressed. Hold 2, 3, 4, or 6 keys together.</span>
+                <span className="text-xs text-[#6B6B6B] dark:text-[#71717A] italic">No keys currently depressed. Hold 2, 3, 4, or 6 keys together.</span>
               )}
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-xs text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800">
-            <span>Highest simultaneous key inputs observed this session: <strong>{maxRollover} keys</strong></span>
-            <span className="text-[11px] text-slate-500">Note: Browser-observed result; hardware behavior may vary by firmware and USB polling rate.</span>
+          <div className="flex items-center justify-between text-xs text-[#6B6B6B] dark:text-[#A1A1AA] pt-2 border-t border-[#E5E5E5] dark:border-[#2A2A2A]">
+            <span>Highest simultaneous key inputs observed this session: <strong className="text-[#111111] dark:text-white">{maxRollover} keys</strong></span>
+            <span className="text-[11px] text-[#6B6B6B] dark:text-[#71717A]">Browser-observed result; hardware behavior may vary by firmware and USB polling rate.</span>
           </div>
         </div>
       )}
 
       {/* TAB 3: ANTI-GHOSTING MATRIX */}
       {activeTab === 'ghosting' && (
-        <div className="bg-white dark:bg-[#0f172a]/90 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm font-mono">
-          <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase mb-1">Controlled Anti-Ghosting Verification</h3>
-          <p className="text-xs text-slate-500 font-sans mb-4">
+        <div className="bg-white dark:bg-[#111111] border border-[#E5E5E5] dark:border-[#2A2A2A] rounded-2xl p-6 shadow-sm font-mono">
+          <h3 className="text-sm font-bold text-[#111111] dark:text-white uppercase mb-1">Controlled Anti-Ghosting Verification</h3>
+          <p className="text-xs text-[#6B6B6B] dark:text-[#A1A1AA] font-sans mb-4">
             Ghosting occurs when pressing certain combinations causes false phantom keys or drops expected keys.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-            <div className="p-4 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl">
-              <span className="text-xs text-slate-400 block mb-2">EXPECTED COMBINATION</span>
+            <div className="p-4 bg-[#F7F7F7] dark:bg-[#161616] border border-[#E5E5E5] dark:border-[#2A2A2A] rounded-xl">
+              <span className="text-xs text-[#6B6B6B] dark:text-[#71717A] block mb-2">EXPECTED COMBINATION</span>
               <div className="flex gap-1.5">
                 {ghostingTarget.map((k) => (
-                  <span key={k} className="px-2.5 py-1 bg-slate-200 dark:bg-slate-800 font-bold text-xs rounded text-slate-900 dark:text-white">
+                  <span key={k} className="px-2.5 py-1 bg-white dark:bg-[#111111] border border-[#E5E5E5] dark:border-[#2A2A2A] font-bold text-xs rounded text-[#111111] dark:text-white">
                     {k.replace('Key', '')}
                   </span>
                 ))}
               </div>
             </div>
 
-            <div className="p-4 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl">
-              <span className="text-xs text-slate-400 block mb-2">DETECTED KEYS</span>
+            <div className="p-4 bg-[#F7F7F7] dark:bg-[#161616] border border-[#E5E5E5] dark:border-[#2A2A2A] rounded-xl">
+              <span className="text-xs text-[#6B6B6B] dark:text-[#71717A] block mb-2">DETECTED KEYS</span>
               <div className="flex flex-wrap gap-1.5">
                 {currentlyHeldKeys.size > 0 ? (
                   Array.from(currentlyHeldKeys).map((k) => (
-                    <span key={k} className="px-2.5 py-1 bg-cyan-500 text-slate-950 font-bold text-xs rounded">
+                    <span key={k} className="px-2.5 py-1 bg-[#FF5A00] text-black font-bold text-xs rounded">
                       {k.replace('Key', '')}
                     </span>
                   ))
                 ) : (
-                  <span className="text-xs text-slate-500 italic">None</span>
+                  <span className="text-xs text-[#6B6B6B] dark:text-[#71717A] italic">None</span>
                 )}
               </div>
             </div>
 
-            <div className="p-4 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl">
-              <span className="text-xs text-slate-400 block mb-2">MATRIX STATUS</span>
-              <div className="text-xs font-bold text-emerald-400">{ghostingResult}</div>
+            <div className="p-4 bg-[#F7F7F7] dark:bg-[#161616] border border-[#E5E5E5] dark:border-[#2A2A2A] rounded-xl">
+              <span className="text-xs text-[#6B6B6B] dark:text-[#71717A] block mb-2">MATRIX STATUS</span>
+              <div className="text-xs font-bold text-[#FF5A00]">{ghostingResult}</div>
             </div>
           </div>
 
@@ -681,7 +681,7 @@ Browser Environment: ${navigator.userAgent.slice(0, 80)}`;
               <button
                 key={preset.label}
                 onClick={() => setGhostingTarget(preset.keys)}
-                className="px-3 py-1.5 rounded-lg text-xs border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-white"
+                className="px-3 py-1.5 rounded-lg text-xs border border-[#E5E5E5] dark:border-[#2A2A2A] bg-[#F7F7F7] dark:bg-[#161616] text-[#111111] dark:text-[#A1A1AA] hover:text-[#FF5A00] hover:border-[#FF5A00]/40 transition-colors"
               >
                 {preset.label}
               </button>
@@ -692,15 +692,15 @@ Browser Environment: ${navigator.userAgent.slice(0, 80)}`;
 
       {/* TAB 4: HEALTH REPORT */}
       {activeTab === 'report' && (
-        <div className="bg-white dark:bg-[#0f172a]/90 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm font-mono">
-          <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div className="bg-white dark:bg-[#111111] border border-[#E5E5E5] dark:border-[#2A2A2A] rounded-2xl p-6 shadow-sm font-mono">
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#E5E5E5] dark:border-[#2A2A2A]">
             <div className="flex items-center gap-2">
-              <FileText className="w-5 h-5 text-cyan-500" />
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase">Keyboard Diagnostic Report</h3>
+              <FileText className="w-5 h-5 text-[#FF5A00]" />
+              <h3 className="text-sm font-bold text-[#111111] dark:text-white uppercase">Keyboard Diagnostic Report</h3>
             </div>
             <button
               onClick={copyHealthReport}
-              className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-500 text-slate-950 hover:bg-cyan-400 transition-colors flex items-center gap-1.5"
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-[#FF5A00] text-black hover:bg-[#FF6E1A] transition-colors flex items-center gap-1.5 shadow-sm"
             >
               {copiedReport ? <CheckCircle2 className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               <span>{copiedReport ? 'COPIED!' : 'COPY REPORT'}</span>
@@ -709,32 +709,32 @@ Browser Environment: ${navigator.userAgent.slice(0, 80)}`;
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div className="space-y-2">
-              <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                <span className="text-slate-500">Selected Layout:</span>
-                <span className="text-slate-900 dark:text-white font-bold">{layout.toUpperCase()}</span>
+              <div className="flex justify-between py-1 border-b border-[#E5E5E5] dark:border-[#2A2A2A]">
+                <span className="text-[#6B6B6B] dark:text-[#71717A]">Selected Layout:</span>
+                <span className="text-[#111111] dark:text-white font-bold">{layout.toUpperCase()}</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                <span className="text-slate-500">Keys Tested:</span>
-                <span className="text-cyan-500 font-bold">{testedCount} / {totalVisible} ({progressPercent}%)</span>
+              <div className="flex justify-between py-1 border-b border-[#E5E5E5] dark:border-[#2A2A2A]">
+                <span className="text-[#6B6B6B] dark:text-[#71717A]">Keys Tested:</span>
+                <span className="text-[#FF5A00] font-bold">{testedCount} / {totalVisible} ({progressPercent}%)</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                <span className="text-slate-500">Max Simultaneous Rollover:</span>
-                <span className="text-amber-500 font-bold">{maxRollover} keys</span>
+              <div className="flex justify-between py-1 border-b border-[#E5E5E5] dark:border-[#2A2A2A]">
+                <span className="text-[#6B6B6B] dark:text-[#71717A]">Max Simultaneous Rollover:</span>
+                <span className="text-[#FF6E1A] font-bold">{maxRollover} keys</span>
               </div>
             </div>
 
             <div className="space-y-2">
-              <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                <span className="text-slate-500">Anti-Ghosting Status:</span>
-                <span className="text-emerald-500 font-bold">PASS (No Phantom Signals)</span>
+              <div className="flex justify-between py-1 border-b border-[#E5E5E5] dark:border-[#2A2A2A]">
+                <span className="text-[#6B6B6B] dark:text-[#71717A]">Anti-Ghosting Status:</span>
+                <span className="text-[#FF5A00] font-bold">PASS (No Phantom Signals)</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                <span className="text-slate-500">Stuck Keys Detected:</span>
-                <span className="text-slate-900 dark:text-white font-bold">0</span>
+              <div className="flex justify-between py-1 border-b border-[#E5E5E5] dark:border-[#2A2A2A]">
+                <span className="text-[#6B6B6B] dark:text-[#71717A]">Stuck Keys Detected:</span>
+                <span className="text-[#111111] dark:text-white font-bold">0</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                <span className="text-slate-500">Overall Diagnostic:</span>
-                <span className="text-emerald-400 font-bold">HEALTHY</span>
+              <div className="flex justify-between py-1 border-b border-[#E5E5E5] dark:border-[#2A2A2A]">
+                <span className="text-[#6B6B6B] dark:text-[#71717A]">Overall Diagnostic:</span>
+                <span className="text-[#FF5A00] font-bold">HEALTHY</span>
               </div>
             </div>
           </div>

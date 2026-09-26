@@ -3,57 +3,106 @@ import { calculateWpm, calculateRawWpm, calculateAccuracy, calculateConsistency,
 import { 
   MetricSnapshot, 
   TestResult, 
-  TestDuration, 
-  WordCountOption, 
   Difficulty, 
+  DifficultyRule,
   Category, 
   TestMode, 
   CodeLanguage, 
-  KeyHeatmapItem 
+  KeyHeatmapItem,
+  LanguageCode,
+  WordSetSize,
+  StopOnError,
+  QuoteLength,
+  CharacterBreakdown,
+  BurstSpeed
 } from '../types/typing';
-import { soundEngine } from '../utils/audioSynth';
 import { calculateSessionRating, analyzeWords, buildErrorAnalysis, generateSmartInsight } from '../utils/expandedAnalytics';
+import { recordTestWeaknesses } from '../data/practiceEngine';
+import { generateConfiguredPassage } from '../data/languages';
+import { soundEngine } from '../utils/audioSynth';
 
 interface UseTypingEngineProps {
   passage: string;
   mode: TestMode;
-  duration?: TestDuration;
-  wordCount?: WordCountOption;
+  duration?: number;
+  wordCount?: number;
   difficulty: Difficulty;
+  difficultyRule?: DifficultyRule;
   category: Category;
   language?: CodeLanguage;
+  dictLanguage?: LanguageCode;
+  wordSet?: WordSetSize;
+  punctuation?: boolean;
+  numbers?: boolean;
   quoteAuthor?: string;
+  quoteLength?: QuoteLength;
   pastHistory?: TestResult[];
   pauseOnBlur?: boolean;
+  // Advanced Rules
+  confidenceMode?: boolean;
+  stopOnError?: StopOnError;
+  freedomMode?: boolean;
+  strictSpace?: boolean;
+  quickEnd?: boolean;
+  blindMode?: boolean;
+  // Conditions
+  minWpm?: number;
+  minAccuracy?: number;
+  // Pace Caret
+  paceWpm?: number;
+  activeTags?: string[];
   onFinish?: (result: TestResult) => void;
+  onFail?: (reason: string) => void;
 }
 
 export function useTypingEngine({
-  passage,
+  passage: initialPassage,
   mode,
   duration = 30,
   wordCount = 25,
   difficulty,
+  difficultyRule = 'normal',
   category,
   language,
+  dictLanguage = 'en',
+  wordSet = 200,
+  punctuation = false,
+  numbers = false,
   quoteAuthor,
+  quoteLength,
   pastHistory = [],
   pauseOnBlur = false,
+  confidenceMode = false,
+  stopOnError = 'off',
+  freedomMode = false,
+  strictSpace = false,
+  quickEnd = true,
+  blindMode = false,
+  minWpm = 0,
+  minAccuracy = 0,
+  paceWpm = 0,
+  activeTags = [],
   onFinish,
+  onFail,
 }: UseTypingEngineProps) {
+  const [passage, setPassage] = useState<string>(initialPassage);
   const [typedChars, setTypedChars] = useState<string>('');
   const [isStarted, setIsStarted] = useState<boolean>(false);
   const [isFinished, setIsFinished] = useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(false);
+  const [isFailed, setIsFailed] = useState<boolean>(false);
+  const [failedReason, setFailedReason] = useState<string | null>(null);
   
-  // Real-time error counts
+  // Real-time error counts & streaks
   const [totalErrors, setTotalErrors] = useState<number>(0);
+  const [extraChars, setExtraChars] = useState<number>(0);
   const [streak, setStreak] = useState<number>(0);
   const [maxStreak, setMaxStreak] = useState<number>(0);
   
   // Active key state for virtual keyboard animation
   const [activeKey, setActiveKey] = useState<string | null>(null);
   const [isKeyError, setIsKeyError] = useState<boolean>(false);
+  const [capsLockActive, setCapsLockActive] = useState<boolean>(false);
   
   // Anti-cheat paste detection toast trigger
   const [pasteAttempted, setPasteAttempted] = useState<boolean>(false);
@@ -61,6 +110,7 @@ export function useTypingEngine({
   // Time & Snapshot history
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
   const metricsHistoryRef = useRef<MetricSnapshot[]>([]);
+  const burstSamplesRef = useRef<number[]>([]);
   const startTimeRef = useRef<number | null>(null);
   const pausedTimeAccumulatorRef = useRef<number>(0);
   const lastPauseStartRef = useRef<number | null>(null);
@@ -69,14 +119,43 @@ export function useTypingEngine({
   
   const onFinishRef = useRef(onFinish);
   onFinishRef.current = onFinish;
+  const onFailRef = useRef(onFail);
+  onFailRef.current = onFail;
+
+  // Latest refs to decouple timer interval and callbacks from keystroke renders
+  const correctCountRef = useRef<number>(0);
+  const incorrectCountRef = useRef<number>(0);
+  const typedCharsRef = useRef<string>('');
+  const totalErrorsRef = useRef<number>(0);
+  const extraCharsRef = useRef<number>(0);
+  const passageRef = useRef<string>(initialPassage);
+  const durationRef = useRef<number>(duration);
+  durationRef.current = duration;
+  const modeRef = useRef<TestMode>(mode);
+  modeRef.current = mode;
+  const minWpmRef = useRef<number>(minWpm);
+  minWpmRef.current = minWpm;
+  const minAccuracyRef = useRef<number>(minAccuracy);
+  minAccuracyRef.current = minAccuracy;
+
+  // Sync initial passage when prop changes
+  useEffect(() => {
+    setPassage(initialPassage);
+  }, [initialPassage]);
 
   // Cleanup on unmount or mode switch
-  const resetEngine = useCallback((_newPassage?: string) => {
+  const resetEngine = useCallback((newPassage?: string) => {
+    if (newPassage) {
+      setPassage(newPassage);
+    }
     setTypedChars('');
     setIsStarted(false);
     setIsFinished(false);
     setIsPaused(false);
+    setIsFailed(false);
+    setFailedReason(null);
     setTotalErrors(0);
+    setExtraChars(0);
     setStreak(0);
     setMaxStreak(0);
     setActiveKey(null);
@@ -84,6 +163,7 @@ export function useTypingEngine({
     setPasteAttempted(false);
     setElapsedSeconds(0);
     metricsHistoryRef.current = [];
+    burstSamplesRef.current = [];
     startTimeRef.current = null;
     pausedTimeAccumulatorRef.current = 0;
     lastPauseStartRef.current = null;
@@ -119,6 +199,14 @@ export function useTypingEngine({
     return { correctCount: correct, incorrectCount: incorrect, charStatuses: statuses };
   }, [passage, typedChars]);
 
+  // Keep latest refs in sync for timer interval and completion logic
+  correctCountRef.current = correctCount;
+  incorrectCountRef.current = incorrectCount;
+  typedCharsRef.current = typedChars;
+  totalErrorsRef.current = totalErrors;
+  extraCharsRef.current = extraChars;
+  passageRef.current = passage;
+
   // Words completed calculation
   const wordsCompleted = useMemo(() => {
     if (!typedChars.trim()) return 0;
@@ -126,12 +214,33 @@ export function useTypingEngine({
   }, [typedChars]);
 
   // Real-time stats
-  const wpm = useMemo(() => calculateWpm(correctCount, elapsedSeconds), [correctCount, elapsedSeconds]);
-  const rawWpm = useMemo(() => calculateRawWpm(typedChars.length, elapsedSeconds), [typedChars.length, elapsedSeconds]);
-  const accuracy = useMemo(() => calculateAccuracy(correctCount, typedChars.length), [correctCount, typedChars.length]);
+  const wpm = useMemo(() => {
+    if (!isStarted || elapsedSeconds <= 0 || correctCount <= 0) return 0;
+    return calculateWpm(correctCount, elapsedSeconds);
+  }, [isStarted, correctCount, elapsedSeconds]);
+
+  const rawWpm = useMemo(() => {
+    if (!isStarted || elapsedSeconds <= 0 || typedChars.length <= 0) return 0;
+    return calculateRawWpm(typedChars.length, elapsedSeconds);
+  }, [isStarted, typedChars.length, elapsedSeconds]);
+
+  const accuracy = useMemo(() => {
+    if (!isStarted || typedChars.length <= 0) return 0;
+    return calculateAccuracy(correctCount, typedChars.length);
+  }, [isStarted, correctCount, typedChars.length]);
   
+  // Pace Caret character position
+  const paceCharIndex = useMemo(() => {
+    if (!paceWpm || paceWpm <= 0 || elapsedSeconds <= 0) return -1;
+    const targetChars = (paceWpm * 5 / 60) * elapsedSeconds;
+    return Math.min(passage.length, Math.floor(targetChars));
+  }, [paceWpm, elapsedSeconds, passage.length]);
+
   // Progress calculation based on mode
   const progress = useMemo(() => {
+    if (mode === 'zen') {
+      return 100; // Zen mode is infinite
+    }
     if (mode === 'words') {
       return Math.min(100, Math.round((wordsCompleted / wordCount) * 100));
     }
@@ -149,7 +258,7 @@ export function useTypingEngine({
 
   // Pause toggle
   const togglePause = useCallback((forceState?: boolean) => {
-    if (!isStarted || isFinished) return;
+    if (!isStarted || isFinished || isFailed) return;
     const nextPaused = forceState !== undefined ? forceState : !isPaused;
     setIsPaused(nextPaused);
 
@@ -161,23 +270,41 @@ export function useTypingEngine({
         lastPauseStartRef.current = null;
       }
     }
-  }, [isStarted, isFinished, isPaused]);
+  }, [isStarted, isFinished, isFailed, isPaused]);
 
   // Tab / window blur handling
   useEffect(() => {
     if (!pauseOnBlur) return;
     const handleBlur = () => {
-      if (isStarted && !isFinished && !isPaused) {
+      if (isStarted && !isFinished && !isPaused && !isFailed) {
         togglePause(true);
       }
     };
     window.addEventListener('blur', handleBlur);
     return () => window.removeEventListener('blur', handleBlur);
-  }, [pauseOnBlur, isStarted, isFinished, isPaused, togglePause]);
+  }, [pauseOnBlur, isStarted, isFinished, isPaused, isFailed, togglePause]);
+
+  // Trigger test early failure (e.g. Master/Expert mode or min thresholds)
+  const failTest = useCallback((reason: string) => {
+    if (isFinished || isFailed) return;
+    setIsFailed(true);
+    setFailedReason(reason);
+    setIsPaused(false);
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
+    recordTestWeaknesses(passage, typedChars);
+
+    if (onFailRef.current) {
+      onFailRef.current(reason);
+    }
+  }, [isFinished, isFailed, passage, typedChars]);
 
   // Complete test logic
   const completeTest = useCallback(() => {
-    if (isFinished) return;
+    if (isFinished || isFailed) return;
     setIsFinished(true);
     setIsPaused(false);
     if (intervalRef.current) {
@@ -185,49 +312,119 @@ export function useTypingEngine({
       intervalRef.current = null;
     }
 
-    soundEngine.playCompletion();
+    const currPassage = passageRef.current;
+    const currTyped = typedCharsRef.current;
+    const currCorrect = correctCountRef.current;
+    const currIncorrect = incorrectCountRef.current;
+    const currErrors = totalErrorsRef.current;
+    const currExtra = extraCharsRef.current;
 
-    const finalElapsed = Math.max(1, elapsedSeconds);
-    const finalWpm = calculateWpm(correctCount, finalElapsed);
-    const finalRawWpm = calculateRawWpm(typedChars.length, finalElapsed);
-    const finalAccuracy = calculateAccuracy(correctCount, typedChars.length);
+    // Record weaknesses automatically into local drill bank
+    recordTestWeaknesses(currPassage, currTyped);
+
+    const totalPaused = pausedTimeAccumulatorRef.current;
+    const exactElapsed = startTimeRef.current 
+      ? Math.max(1, (Date.now() - startTimeRef.current - totalPaused) / 1000)
+      : Math.max(1, elapsedSeconds);
+
+    const finalWpm = calculateWpm(currCorrect, exactElapsed);
+    const finalRawWpm = calculateRawWpm(currTyped.length, exactElapsed);
+    const finalAccuracy = calculateAccuracy(currCorrect, currTyped.length);
     const finalConsistency = calculateConsistency(metricsHistoryRef.current);
     const finalScore = calculateScore(finalWpm, finalAccuracy, finalConsistency, difficulty);
     const sessionRating = calculateSessionRating(finalWpm, finalAccuracy, finalConsistency);
-    const wordAnalysis = analyzeWords(passage, typedChars, finalElapsed);
-    const errorAnalysis = buildErrorAnalysis(heatmapRef.current, totalErrors, typedChars.length);
+    const wordAnalysis = analyzeWords(currPassage, currTyped, exactElapsed);
+    const errorAnalysis = buildErrorAnalysis(heatmapRef.current, currErrors, currTyped.length);
     const smartInsight = generateSmartInsight(
-      { wpm: finalWpm, accuracy: finalAccuracy, errors: totalErrors, consistency: finalConsistency },
+      { wpm: finalWpm, accuracy: finalAccuracy, errors: currErrors, consistency: finalConsistency },
       pastHistory,
       errorAnalysis.mostMistypedKey?.key
     );
+
+    // Burst speed metrics - realistic human performance
+    const validBurstValues = burstSamplesRef.current.filter(v => v > 0);
+    const samplesToUse = validBurstValues.length > 0 ? validBurstValues : [finalWpm];
+    const peakWpm = Math.max(...samplesToUse, finalWpm);
+    const avgBurstWpm = Math.round(samplesToUse.reduce((a, b) => a + b, 0) / samplesToUse.length);
+    const burstSpeed: BurstSpeed = { peakWpm, avgBurstWpm };
+
+    // Missed characters calculation
+    const missedChars = Math.max(0, currPassage.length - currTyped.length);
+    const characterBreakdown: CharacterBreakdown = {
+      correct: currCorrect,
+      incorrect: currIncorrect,
+      extra: currExtra,
+      missed: missedChars,
+    };
+
+    // Ensure metricsHistory always has rich speed samples across the test duration for graph
+    const finalSec = Math.max(1, Math.round(exactElapsed));
+    if (metricsHistoryRef.current.length === 0) {
+      metricsHistoryRef.current.push({
+        second: 0,
+        wpm: 0,
+        rawWpm: 0,
+        accuracy: 100,
+        errors: 0,
+      });
+      metricsHistoryRef.current.push({
+        second: finalSec,
+        wpm: finalWpm,
+        rawWpm: finalRawWpm,
+        accuracy: finalAccuracy,
+        errors: currErrors,
+      });
+    } else {
+      const lastPoint = metricsHistoryRef.current[metricsHistoryRef.current.length - 1];
+      if (lastPoint.second < finalSec) {
+        metricsHistoryRef.current.push({
+          second: finalSec,
+          wpm: finalWpm,
+          rawWpm: finalRawWpm,
+          accuracy: finalAccuracy,
+          errors: currErrors,
+        });
+      }
+    }
+
+    soundEngine.playCompletion();
 
     const result: TestResult = {
       id: `test-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
       timestamp: Date.now(),
       mode,
-      duration: mode === 'time' ? duration : undefined,
+      duration: mode === 'time' ? duration : finalSec,
       wordCount: mode === 'words' ? wordCount : undefined,
       difficulty,
+      difficultyRule,
       category,
       language,
+      dictLanguage,
+      wordSet,
+      punctuationEnabled: punctuation,
+      numbersEnabled: numbers,
       quoteAuthor,
+      quoteLength,
       wpm: finalWpm,
       rawWpm: finalRawWpm,
       accuracy: finalAccuracy,
-      errors: totalErrors,
-      correctChars: correctCount,
-      incorrectChars: incorrectCount,
-      totalChars: typedChars.length,
+      errors: currErrors,
+      correctChars: currCorrect,
+      incorrectChars: currIncorrect,
+      totalChars: currTyped.length,
+      characterBreakdown,
+      burstSpeed,
       score: finalScore,
       sessionRating,
       consistency: finalConsistency,
       metricsHistory: [...metricsHistoryRef.current],
-      passageSnippet: passage.slice(0, 60) + '...',
+      passageSnippet: currPassage.slice(0, 60) + '...',
       heatmap: { ...heatmapRef.current },
       wordAnalysis,
       errorAnalysis,
       smartInsight,
+      tags: [...activeTags],
+      isFailed: false,
     };
 
     if (onFinishRef.current) {
@@ -235,62 +432,116 @@ export function useTypingEngine({
     }
   }, [
     isFinished,
-    elapsedSeconds,
-    correctCount,
-    typedChars,
+    isFailed,
     difficulty,
+    difficultyRule,
     mode,
     duration,
     wordCount,
     category,
     language,
+    dictLanguage,
+    wordSet,
+    punctuation,
+    numbers,
     quoteAuthor,
-    totalErrors,
-    incorrectCount,
-    passage,
+    quoteLength,
     pastHistory,
+    activeTags,
   ]);
 
-  // Per-second sampler for live metrics & graph
+  const completeTestRef = useRef(completeTest);
+  completeTestRef.current = completeTest;
+  const failTestRef = useRef(failTest);
+  failTestRef.current = failTest;
+
+  // Per-second sampler for live metrics & graph with stable 100ms timer tick
   useEffect(() => {
-    if (!isStarted || isFinished || isPaused) return;
+    if (!isStarted || isFinished || isPaused || isFailed) {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      return;
+    }
+
+    let lastSampleSecond = 0;
+    let lastTypedCount = typedCharsRef.current.length;
 
     intervalRef.current = window.setInterval(() => {
       if (!startTimeRef.current) return;
       const totalPaused = pausedTimeAccumulatorRef.current;
-      const currentElapsed = Math.floor((Date.now() - startTimeRef.current - totalPaused) / 1000);
+      const exactElapsedSec = (Date.now() - startTimeRef.current - totalPaused) / 1000;
+      const currentElapsed = Math.floor(exactElapsedSec);
       setElapsedSeconds(currentElapsed);
 
       // Auto-end for time-based mode
-      if (mode === 'time' && currentElapsed >= duration) {
-        completeTest();
+      if (modeRef.current === 'time' && exactElapsedSec >= durationRef.current) {
+        completeTestRef.current();
         return;
       }
 
-      // Record snapshot
-      const currentWpm = calculateWpm(correctCount, currentElapsed);
-      const currentRawWpm = calculateRawWpm(typedChars.length, currentElapsed);
-      const currentAccuracy = calculateAccuracy(correctCount, typedChars.length);
+      // Record snapshot once per integer second
+      if (currentElapsed > lastSampleSecond && currentElapsed > 0) {
+        lastSampleSecond = currentElapsed;
+        const currentTyped = typedCharsRef.current;
+        const currentCorrect = correctCountRef.current;
+        const currentErrors = totalErrorsRef.current;
 
-      metricsHistoryRef.current.push({
-        second: currentElapsed,
-        wpm: currentWpm,
-        rawWpm: currentRawWpm,
-        accuracy: currentAccuracy,
-        errors: totalErrors,
-      });
-    }, 1000);
+        const currentWpm = calculateWpm(currentCorrect, currentElapsed);
+        const currentRawWpm = calculateRawWpm(currentTyped.length, currentElapsed);
+        const currentAccuracy = calculateAccuracy(currentCorrect, currentTyped.length);
+
+        // 1-second burst speed calculation
+        const charsInLastSecond = Math.max(0, currentTyped.length - lastTypedCount);
+        lastTypedCount = currentTyped.length;
+        const rawBurst = Math.round((charsInLastSecond / 5) * 60);
+        // Clamped to realistic human upper limit (<= 200)
+        const burstWpmNow = Math.min(200, rawBurst);
+        if (burstWpmNow > 0) {
+          burstSamplesRef.current.push(burstWpmNow);
+        }
+
+        metricsHistoryRef.current.push({
+          second: currentElapsed,
+          wpm: currentWpm,
+          rawWpm: currentRawWpm,
+          accuracy: currentAccuracy,
+          errors: currentErrors,
+        });
+
+        // Minimum performance condition checks
+        if (minWpmRef.current > 0 && currentElapsed >= 5 && currentWpm < minWpmRef.current) {
+          failTestRef.current(`Pace fell below minimum requirement (${minWpmRef.current} WPM)`);
+          return;
+        }
+
+        if (minAccuracyRef.current > 0 && currentTyped.length >= 10 && currentAccuracy < minAccuracyRef.current) {
+          failTestRef.current(`Accuracy fell below minimum threshold (${minAccuracyRef.current}%)`);
+          return;
+        }
+      }
+    }, 100);
 
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
     };
-  }, [isStarted, isFinished, isPaused, mode, duration, correctCount, typedChars.length, totalErrors, completeTest]);
+  }, [
+    isStarted, 
+    isFinished, 
+    isPaused, 
+    isFailed
+  ]);
 
   // Handle keystroke input
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    if (isFinished || isPaused) return;
+    if (isFinished || isPaused || isFailed) return;
+
+    // Detect CapsLock
+    setCapsLockActive(e.getModifierState('CapsLock'));
 
     const key = e.key;
 
@@ -309,11 +560,15 @@ export function useTypingEngine({
     setActiveKey(key);
     setTimeout(() => setActiveKey(null), 140);
 
+    // CONFIDENCE MODE: Block Backspace completely
     if (key === 'Backspace') {
       e.preventDefault();
+      if (confidenceMode) {
+        return;
+      }
+
       if (typedChars.length > 0) {
         setTypedChars(prev => prev.slice(0, -1));
-        soundEngine.playKeyPress(false);
       }
       return;
     }
@@ -324,17 +579,77 @@ export function useTypingEngine({
     // Only process single characters or Enter newline
     if (charToCompare.length === 1) {
       e.preventDefault();
+      soundEngine.playKeyPress(charToCompare === ' ');
 
       if (typedChars.length >= passage.length) {
-        completeTest();
-        return;
+        if (mode === 'zen' || mode === 'time') {
+          // In Zen or Time Mode, seamlessly append more generated words!
+          const nextSegment = ' ' + generateConfiguredPassage({
+            language: dictLanguage,
+            wordSetSize: wordSet,
+            wordCount: 25,
+            punctuation,
+            numbers
+          });
+          setPassage(prev => prev + nextSegment);
+        } else {
+          completeTest();
+          return;
+        }
       }
 
       const nextTargetChar = passage[typedChars.length];
       const isCorrect = charToCompare === nextTargetChar;
 
+      // STOP ON ERROR: LETTER
+      // If stopOnError === 'letter', do not advance until correct letter is typed
+      if (stopOnError === 'letter' && !isCorrect) {
+        setIsKeyError(true);
+        setTimeout(() => setIsKeyError(false), 200);
+        setTotalErrors(err => err + 1);
+        setStreak(0);
+        return;
+      }
+
+      // STOP ON ERROR: WORD
+      // If user presses Space to proceed to next word, check if current word has errors
+      if (stopOnError === 'word' && charToCompare === ' ') {
+        const lastSpaceIndex = typedChars.lastIndexOf(' ');
+        const currentWordStart = lastSpaceIndex === -1 ? 0 : lastSpaceIndex + 1;
+        const currentTypedWord = typedChars.slice(currentWordStart);
+        const currentTargetWord = passage.slice(currentWordStart, typedChars.length);
+        if (currentTypedWord !== currentTargetWord) {
+          setIsKeyError(true);
+          setTimeout(() => setIsKeyError(false), 200);
+          return;
+        }
+      }
+
+      // STRICT SPACE: Cannot space past incomplete word
+      if (strictSpace && charToCompare === ' ' && nextTargetChar !== ' ') {
+        return;
+      }
+
+      // DIFFICULTY RULE: MASTER (Any single miskey fails immediately!)
+      if (difficultyRule === 'master' && !isCorrect) {
+        failTest('Master Mode: Single miskey detected');
+        return;
+      }
+
+      // DIFFICULTY RULE: EXPERT (Submitting a mistyped word via space fails immediately)
+      if (difficultyRule === 'expert' && charToCompare === ' ') {
+        const lastSpaceIndex = typedChars.lastIndexOf(' ');
+        const currentWordStart = lastSpaceIndex === -1 ? 0 : lastSpaceIndex + 1;
+        const currentTypedWord = typedChars.slice(currentWordStart);
+        const currentTargetWord = passage.slice(currentWordStart, typedChars.length);
+        if (currentTypedWord !== currentTargetWord) {
+          failTest('Expert Mode: Submitted mistyped word');
+          return;
+        }
+      }
+
       // Heatmap tracking
-      const targetLower = nextTargetChar.toLowerCase();
+      const targetLower = nextTargetChar ? nextTargetChar.toLowerCase() : ' ';
       if (!heatmapRef.current[targetLower]) {
         heatmapRef.current[targetLower] = { key: targetLower, typed: 0, correct: 0, errors: 0, mistakesTo: {} };
       }
@@ -342,7 +657,6 @@ export function useTypingEngine({
 
       if (isCorrect) {
         heatmapRef.current[targetLower].correct++;
-        soundEngine.playKeyPress(charToCompare === ' ' || charToCompare === '\n');
         setIsKeyError(false);
         setStreak(prev => {
           const next = prev + 1;
@@ -364,21 +678,54 @@ export function useTypingEngine({
       const nextTyped = typedChars + charToCompare;
       setTypedChars(nextTyped);
 
+      // In Zen or Time mode, dynamically append next chunk when approaching the end of buffer
+      if ((mode === 'zen' || mode === 'time') && passage.length - nextTyped.length < 35) {
+        const nextSegment = ' ' + generateConfiguredPassage({
+          language: dictLanguage,
+          wordSetSize: wordSet,
+          wordCount: 25,
+          punctuation,
+          numbers
+        });
+        setPassage(prev => prev + nextSegment);
+      }
+
       // Check for Word Mode completion
       if (mode === 'words') {
         const wordsNow = nextTyped.trim().split(/\s+/).filter(Boolean).length;
         if (wordsNow >= wordCount) {
-          setTimeout(() => completeTest(), 50);
+          setTimeout(() => completeTest(), 40);
           return;
         }
       }
 
-      // Check for passage end
+      // Check for passage end (Quick End finishes on last character for custom/quote/code/preset modes)
       if (nextTyped.length === passage.length) {
-        setTimeout(() => completeTest(), 50);
+        if (mode !== 'zen' && mode !== 'time') {
+          setTimeout(() => completeTest(), 40);
+        }
       }
     }
-  }, [isFinished, isPaused, isStarted, typedChars, passage, completeTest, mode, wordCount]);
+  }, [
+    isFinished,
+    isPaused,
+    isFailed,
+    isStarted,
+    typedChars,
+    passage,
+    completeTest,
+    failTest,
+    mode,
+    wordCount,
+    confidenceMode,
+    stopOnError,
+    strictSpace,
+    difficultyRule,
+    dictLanguage,
+    wordSet,
+    punctuation,
+    numbers
+  ]);
 
   // Anti-cheat: prevent paste
   const handlePaste = useCallback((e: React.ClipboardEvent) => {
@@ -388,23 +735,30 @@ export function useTypingEngine({
   }, []);
 
   return {
+    passage,
     typedChars,
     charStatuses,
+    correctCount,
     wpm,
     rawWpm,
     accuracy,
     progress,
     wordsCompleted,
     totalErrors,
+    extraChars,
     streak,
     maxStreak,
     isStarted,
     isFinished,
     isPaused,
+    isFailed,
+    failedReason,
     elapsedSeconds,
     activeKey,
     isKeyError,
     expectedChar,
+    paceCharIndex,
+    capsLockActive,
     pasteAttempted,
     metricsHistory: metricsHistoryRef.current,
     heatmap: heatmapRef.current,

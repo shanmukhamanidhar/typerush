@@ -1,51 +1,103 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { MetricSnapshot } from '../types/typing';
 
 interface PerformanceGraphProps {
-  metrics: MetricSnapshot[];
-  duration: number;
+  metrics?: MetricSnapshot[];
+  duration?: number;
   height?: number;
   showLabels?: boolean;
 }
 
 export const PerformanceGraph: React.FC<PerformanceGraphProps> = ({
   metrics,
-  duration,
+  duration = 30,
   height = 140,
   showLabels = true,
 }) => {
-  if (!metrics || metrics.length === 0) {
-    return (
-      <div 
-        style={{ height }} 
-        className="w-full flex items-center justify-center text-xs text-slate-400 dark:text-slate-500 font-mono border border-dashed border-slate-200 dark:border-slate-800 rounded-xl"
-      >
-        Waiting for speed samples...
-      </div>
-    );
-  }
+  // Normalize metrics so there are always valid points plotted across the full duration
+  const safeMetrics = useMemo(() => {
+    const list = metrics && metrics.length > 0 ? [...metrics] : [];
+    const maxSec = Math.max(1, duration || (list.length > 0 ? list[list.length - 1].second : 1));
 
-  const maxWpm = Math.max(60, ...metrics.map((m) => Math.max(m.wpm, m.rawWpm))) + 15;
+    if (list.length === 0) {
+      return [
+        { second: 0, wpm: 0, rawWpm: 0, accuracy: 100, errors: 0 },
+        { second: maxSec, wpm: 0, rawWpm: 0, accuracy: 100, errors: 0 },
+      ];
+    }
+
+    if (list.length === 1) {
+      const p = list[0];
+      return [
+        { 
+          second: 0, 
+          wpm: Math.max(0, Math.round(p.wpm * 0.8)), 
+          rawWpm: Math.max(0, Math.round(p.rawWpm * 0.8)), 
+          accuracy: p.accuracy, 
+          errors: 0 
+        },
+        { 
+          second: maxSec, 
+          wpm: p.wpm, 
+          rawWpm: p.rawWpm, 
+          accuracy: p.accuracy, 
+          errors: p.errors 
+        },
+      ];
+    }
+
+    // Ensure list starts from second 0
+    if (list[0].second > 0) {
+      list.unshift({
+        second: 0,
+        wpm: Math.max(0, Math.round(list[0].wpm * 0.8)),
+        rawWpm: Math.max(0, Math.round(list[0].rawWpm * 0.8)),
+        accuracy: list[0].accuracy,
+        errors: 0,
+      });
+    }
+
+    // Ensure list extends to the test duration
+    const lastPoint = list[list.length - 1];
+    if (lastPoint.second < maxSec) {
+      list.push({
+        second: maxSec,
+        wpm: lastPoint.wpm,
+        rawWpm: lastPoint.rawWpm,
+        accuracy: lastPoint.accuracy,
+        errors: lastPoint.errors,
+      });
+    }
+
+    return list;
+  }, [metrics, duration]);
+
+  const maxWpm = Math.max(50, ...safeMetrics.map((m) => Math.max(m.wpm || 0, m.rawWpm || 0))) + 15;
   const padding = 24;
   const graphWidth = 600;
   const graphHeight = height;
 
-  const points = metrics.map((m) => {
-    const x = padding + (m.second / duration) * (graphWidth - padding * 2);
-    const y = graphHeight - padding - (m.wpm / maxWpm) * (graphHeight - padding * 2);
+  const effectiveDuration = Math.max(
+    1, 
+    duration || safeMetrics[safeMetrics.length - 1].second
+  );
+
+  const points = safeMetrics.map((m) => {
+    const x = padding + (m.second / effectiveDuration) * (graphWidth - padding * 2);
+    const y = graphHeight - padding - ((m.wpm || 0) / maxWpm) * (graphHeight - padding * 2);
     return { x, y, ...m };
   });
 
-  const rawPoints = metrics.map((m) => {
-    const x = padding + (m.second / duration) * (graphWidth - padding * 2);
-    const y = graphHeight - padding - (m.rawWpm / maxWpm) * (graphHeight - padding * 2);
+  const rawPoints = safeMetrics.map((m) => {
+    const x = padding + (m.second / effectiveDuration) * (graphWidth - padding * 2);
+    const y = graphHeight - padding - ((m.rawWpm || 0) / maxWpm) * (graphHeight - padding * 2);
     return { x, y };
   });
 
   // SVG Path generator
   const createSmoothPath = (pts: { x: number; y: number }[]) => {
     if (pts.length === 0) return '';
-    if (pts.length === 1) return `M ${pts[0].x} ${pts[0].y}`;
+    if (pts.length === 1) return `M ${pts[0].x} ${pts[0].y} L ${pts[0].x} ${pts[0].y}`;
     return pts.reduce((acc, point, i, arr) => {
       if (i === 0) return `M ${point.x} ${point.y}`;
       const prev = arr[i - 1];
@@ -70,8 +122,8 @@ export const PerformanceGraph: React.FC<PerformanceGraphProps> = ({
       >
         <defs>
           <linearGradient id="wpmGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#00f0ff" stopOpacity="0.35" />
-            <stop offset="100%" stopColor="#00f0ff" stopOpacity="0.0" />
+            <stop offset="0%" stopColor="#FF5A00" stopOpacity="0.22" />
+            <stop offset="100%" stopColor="#FF5A00" stopOpacity="0.0" />
           </linearGradient>
         </defs>
 
@@ -87,7 +139,7 @@ export const PerformanceGraph: React.FC<PerformanceGraphProps> = ({
                 x2={graphWidth - padding}
                 y2={y}
                 stroke="currentColor"
-                className="text-slate-200 dark:text-slate-800"
+                className="text-[#D8D6D1] dark:text-[#242424]"
                 strokeDasharray="4 4"
                 strokeWidth="1"
               />
@@ -96,7 +148,7 @@ export const PerformanceGraph: React.FC<PerformanceGraphProps> = ({
                   x={padding - 6}
                   y={y + 3}
                   textAnchor="end"
-                  className="text-[9px] fill-slate-400 font-mono"
+                  className="text-[9px] fill-[#6F6F6F] dark:fill-[#888888] font-mono"
                 >
                   {val}
                 </text>
@@ -110,24 +162,24 @@ export const PerformanceGraph: React.FC<PerformanceGraphProps> = ({
           <path d={areaPath} fill="url(#wpmGradient)" />
         )}
 
-        {/* Raw WPM Line (subtle dashed sky line) */}
+        {/* Raw WPM Line (dashed soft orange line) */}
         {rawLinePath && (
           <path
             d={rawLinePath}
             fill="none"
-            stroke="#38bdf8"
+            stroke="#FF6E1A"
             strokeWidth="1.5"
             strokeDasharray="2 3"
-            opacity="0.6"
+            opacity="0.8"
           />
         )}
 
-        {/* Net WPM Line (bold cyan stroke) */}
+        {/* Net WPM Line (bold primary orange stroke) */}
         {linePath && (
           <path
             d={linePath}
             fill="none"
-            stroke="#00f0ff"
+            stroke="#FF5A00"
             strokeWidth="2.5"
             strokeLinecap="round"
           />
@@ -140,19 +192,19 @@ export const PerformanceGraph: React.FC<PerformanceGraphProps> = ({
             cx={pt.x}
             cy={pt.y}
             r="3"
-            className="fill-cyan-400 stroke-slate-900 stroke-2"
+            className="fill-[#FF5A00] stroke-[#F7F6F2] dark:stroke-[#080808] stroke-2"
           />
         ))}
       </svg>
 
       {/* Legend */}
-      <div className="flex items-center justify-end gap-4 text-[10px] font-mono text-slate-400 mt-1">
+      <div className="flex items-center justify-end gap-4 text-[10px] font-mono text-[#6F6F6F] dark:text-[#888888] mt-1">
         <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-0.5 bg-cyan-400 inline-block rounded" />
+          <span className="w-2.5 h-0.5 bg-[#FF5A00] inline-block rounded" />
           <span>Net WPM</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-0.5 bg-sky-400 inline-block border-b border-dashed" />
+          <span className="w-2.5 h-0.5 bg-[#FF6E1A] inline-block border-b border-dashed" />
           <span>Raw WPM</span>
         </div>
       </div>

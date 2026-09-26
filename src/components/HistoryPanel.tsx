@@ -67,16 +67,16 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({
     <div className="w-full max-w-5xl mx-auto py-6 px-4 animate-fadeIn font-mono">
       
       {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-200 dark:border-slate-800">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-[#E5E5E5] dark:border-[#2A2A2A]">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-cyan-500/10 text-cyan-500 border border-cyan-500/20">
+          <div className="p-2.5 rounded-xl bg-[#FF5A00]/10 text-[#FF5A00] border border-[#FF5A00]/30">
             <History className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+            <h2 className="text-xl font-bold text-[#111111] dark:text-[#F5F5F5]">
               Searchable Test History
             </h2>
-            <p className="text-xs text-slate-400 font-sans">
+            <p className="text-xs text-[#6B6B6B] dark:text-[#A1A1AA] font-sans">
               {history.length} completed sessions recorded locally
             </p>
           </div>
@@ -85,7 +85,7 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({
         {history.length > 0 && (
           <button
             onClick={() => setShowConfirmClear(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 border border-rose-500/20 transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-[#FF3B5C] hover:bg-[#FF3B5C]/10 border border-[#FF3B5C]/30 transition-all"
           >
             <Trash2 className="w-3.5 h-3.5" />
             <span>Clear History</span>
@@ -103,10 +103,10 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({
               <button
                 key={m}
                 onClick={() => setFilterMode(m)}
-                className={`px-3 py-1.5 rounded-lg border font-bold uppercase ${
+                className={`px-3 py-1.5 rounded-lg border font-bold uppercase transition-all ${
                   filterMode === m
-                    ? 'bg-cyan-500 text-slate-950 border-cyan-400 shadow-sm'
-                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-400 hover:text-white'
+                    ? 'bg-[#FF5A00] text-black border-[#FF5A00] shadow-sm font-black'
+                    : 'bg-[#F7F7F7] dark:bg-[#161616] border-[#E5E5E5] dark:border-[#2A2A2A] text-[#6B6B6B] dark:text-[#A1A1AA] hover:text-[#111111] dark:hover:text-white'
                 }`}
               >
                 {m}
@@ -117,20 +117,20 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({
           {/* Search & Sort Dropdowns */}
           <div className="flex items-center gap-2">
             <div className="relative flex-1 sm:w-48">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400" />
+              <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-[#6B6B6B] dark:text-[#71717A]" />
               <input
                 type="text"
                 placeholder="Search history..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 font-sans"
+                className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-[#F7F7F7] dark:bg-[#161616] border border-[#E5E5E5] dark:border-[#2A2A2A] text-xs text-[#111111] dark:text-white focus:outline-none focus:border-[#FF5A00] font-sans"
               />
             </div>
 
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-300 focus:outline-none focus:border-cyan-500"
+              className="px-3 py-1.5 rounded-lg bg-[#F7F7F7] dark:bg-[#161616] border border-[#E5E5E5] dark:border-[#2A2A2A] text-xs font-bold text-[#111111] dark:text-white focus:outline-none focus:border-[#FF5A00]"
             >
               <option value="newest">Newest First</option>
               <option value="oldest">Oldest First</option>
@@ -144,21 +144,21 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({
 
       {/* Confirmation Modal */}
       {showConfirmClear && (
-        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
-          <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl">
-            <div className="flex items-center gap-3 text-rose-500 mb-3">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
+          <div className="bg-white dark:bg-[#151515] border border-[#E5E5E5] dark:border-[#222222] rounded-xl p-6 max-w-sm w-full shadow-2xl">
+            <div className="flex items-center gap-3 text-[#FF3B5C] mb-3">
               <AlertTriangle className="w-6 h-6" />
-              <h3 className="font-bold text-base text-slate-900 dark:text-white">
+              <h3 className="font-bold text-base text-[#111111] dark:text-white">
                 Clear all test history?
               </h3>
             </div>
-            <p className="text-xs text-slate-400 mb-6 font-sans leading-relaxed">
+            <p className="text-xs text-[#666666] dark:text-[#A1A1AA] mb-6 font-sans leading-relaxed">
               This will permanently delete all your recorded typing sessions and personal scores. This action cannot be undone.
             </p>
             <div className="flex items-center justify-end gap-3">
               <button
                 onClick={() => setShowConfirmClear(false)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:bg-slate-800 transition-colors"
+                className="px-4 py-2 rounded-lg text-xs font-semibold text-[#666666] dark:text-[#A1A1AA] hover:bg-[#F7F7F7] dark:hover:bg-[#0A0A0A] transition-colors"
               >
                 Cancel
               </button>
@@ -167,7 +167,7 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({
                   onClearHistory();
                   setShowConfirmClear(false);
                 }}
-                className="px-4 py-2 rounded-xl text-xs font-semibold bg-rose-500 hover:bg-rose-600 text-white transition-colors"
+                className="px-4 py-2 rounded-lg text-xs font-semibold bg-[#FF3B5C] hover:brightness-110 text-white transition-colors"
               >
                 Yes, Clear
               </button>
@@ -178,14 +178,14 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({
 
       {/* Empty State */}
       {filteredHistory.length === 0 ? (
-        <div className="w-full text-center py-16 px-4 bg-white dark:bg-[#0f172a]/60 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl">
-          <div className="w-14 h-14 mx-auto rounded-2xl bg-cyan-500/10 text-cyan-500 border border-cyan-500/20 flex items-center justify-center mb-4">
+        <div className="w-full text-center py-16 px-4 bg-white dark:bg-[#111111] border border-dashed border-[#E5E5E5] dark:border-[#2A2A2A] rounded-2xl">
+          <div className="w-14 h-14 mx-auto rounded-xl bg-[#FF5A00]/10 text-[#FF5A00] border border-[#FF5A00]/30 flex items-center justify-center mb-4">
             <History className="w-7 h-7" />
           </div>
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+          <h3 className="text-lg font-bold text-[#111111] dark:text-white mb-2">
             {history.length === 0 ? 'No previous tests yet' : 'No matching sessions found'}
           </h3>
-          <p className="text-sm text-slate-400 font-sans max-w-md mx-auto mb-6">
+          <p className="text-sm text-[#6B6B6B] dark:text-[#A1A1AA] font-sans max-w-md mx-auto mb-6">
             {history.length === 0
               ? 'Complete your first typing test to start building your performance history and tracking personal bests.'
               : 'Try clearing the search query or changing your mode filter to view more sessions.'}
@@ -193,7 +193,7 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({
           {history.length === 0 && (
             <button
               onClick={onStartTest}
-              className="px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider text-slate-950 bg-gradient-to-r from-cyan-400 to-sky-400 hover:from-cyan-300 hover:to-sky-300 shadow-lg shadow-cyan-500/25 transition-all inline-flex items-center gap-2"
+              className="px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider text-black bg-[#FF5A00] hover:bg-[#FF6E1A] shadow-lg shadow-[#FF5A00]/25 transition-all inline-flex items-center gap-2"
             >
               <span>START TEST</span>
               <ArrowRight className="w-4 h-4" />
@@ -202,10 +202,10 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({
         </div>
       ) : (
         /* History Table */
-        <div className="w-full bg-white dark:bg-[#0f172a]/90 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-lg">
+        <div className="w-full bg-white dark:bg-[#111111] border border-[#E5E5E5] dark:border-[#2A2A2A] rounded-2xl overflow-hidden shadow-lg">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 dark:bg-slate-900/80 text-[11px] font-mono uppercase tracking-wider text-slate-400 border-b border-slate-200 dark:border-slate-800">
+              <thead className="bg-[#F7F7F7] dark:bg-[#0A0A0A] text-[11px] font-mono uppercase tracking-wider text-[#6B6B6B] dark:text-[#71717A] border-b border-[#E5E5E5] dark:border-[#2A2A2A]">
                 <tr>
                   <th className="py-3 px-4">Date / Time</th>
                   <th className="py-3 px-4">Mode</th>
@@ -216,41 +216,41 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({
                   <th className="py-3 px-4 text-right">Score</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-mono text-xs">
+              <tbody className="divide-y divide-[#E5E5E5] dark:divide-[#2A2A2A] font-mono text-xs">
                 {filteredHistory.map((item) => (
                   <tr 
                     key={item.id} 
-                    className="hover:bg-slate-50/80 dark:hover:bg-slate-850/50 transition-colors"
+                    className="hover:bg-[#F7F7F7] dark:hover:bg-[#161616] transition-colors"
                   >
-                    <td className="py-3 px-4 text-slate-400 whitespace-nowrap">
+                    <td className="py-3 px-4 text-[#6B6B6B] dark:text-[#A1A1AA] whitespace-nowrap">
                       {formatDate(item.timestamp)}
                     </td>
                     <td className="py-3 px-4">
-                      <span className="inline-flex items-center gap-1 font-semibold text-slate-300 uppercase">
+                      <span className="inline-flex items-center gap-1 font-semibold text-[#111111] dark:text-white uppercase">
                         {item.mode} {item.wordCount ? `(${item.wordCount}w)` : item.duration ? `(${item.duration}s)` : ''}
                       </span>
                     </td>
                     <td className="py-3 px-4">
-                      <span className={`text-[10px] px-2 py-0.5 rounded border uppercase font-medium ${
+                      <span className={`text-[10px] px-2 py-0.5 rounded border uppercase font-bold ${
                         item.difficulty === 'easy'
-                          ? 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20'
+                          ? 'text-[#FF6E1A] bg-[#FF6E1A]/10 border-[#FF6E1A]/30'
                           : item.difficulty === 'medium'
-                          ? 'text-cyan-500 bg-cyan-500/10 border-cyan-500/20'
-                          : 'text-rose-500 bg-rose-500/10 border-rose-500/20'
+                          ? 'text-[#FF6E1A] bg-[#FF6E1A]/10 border-[#FF6E1A]/30'
+                          : 'text-[#FF3B5C] bg-[#FF3B5C]/10 border-[#FF3B5C]/30'
                       }`}>
                         {item.difficulty}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-right font-black text-cyan-400 text-sm">
+                    <td className="py-3 px-4 text-right font-black text-[#FF5A00] text-sm glow-orange">
                       {item.wpm}
                     </td>
-                    <td className="py-3 px-4 text-right text-slate-200">
+                    <td className="py-3 px-4 text-right text-[#111111] dark:text-white font-bold">
                       {item.accuracy.toFixed(1)}%
                     </td>
-                    <td className="py-3 px-4 text-right font-bold text-amber-400">
+                    <td className="py-3 px-4 text-right font-black text-[#FF6E1A]">
                       {item.sessionRating || 'B+'}
                     </td>
-                    <td className="py-3 px-4 text-right font-bold text-slate-900 dark:text-white">
+                    <td className="py-3 px-4 text-right font-bold text-[#111111] dark:text-white">
                       {item.score}
                     </td>
                   </tr>

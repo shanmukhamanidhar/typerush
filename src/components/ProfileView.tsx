@@ -12,7 +12,7 @@ import {
   Sparkles, 
   Lock, 
   Terminal, 
-  Calendar 
+  Calendar
 } from 'lucide-react';
 import { UserProfile, Goal, Achievement, TestResult, PersonalBests } from '../types/typing';
 
@@ -40,10 +40,10 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   };
 
   const avatarStyles: { id: UserProfile['avatarStyle']; label: string; gradient: string }[] = [
-    { id: 'cyan', label: 'Electric Cyan', gradient: 'from-cyan-400 to-blue-600 shadow-cyan-500/30' },
-    { id: 'neon', label: 'Neon Mint', gradient: 'from-teal-300 to-emerald-600 shadow-emerald-500/30' },
-    { id: 'purple', label: 'Cosmic Violet', gradient: 'from-purple-400 to-indigo-600 shadow-purple-500/30' },
-    { id: 'sunset', label: 'Solar Sunset', gradient: 'from-amber-400 to-rose-600 shadow-rose-500/30' },
+    { id: 'cyan', label: 'Precision Orange', gradient: 'from-[#FF5A00] to-[#D95400] shadow-[#FF5A00]/30' },
+    { id: 'neon', label: 'Solar Orange', gradient: 'from-[#FF6E1A] to-[#FF5A00] shadow-[#FF6E1A]/30' },
+    { id: 'purple', label: 'Dark Flame', gradient: 'from-[#FF6E1A] to-[#993C00] shadow-[#FF6E1A]/30' },
+    { id: 'sunset', label: 'Solar Sunset', gradient: 'from-[#FFA347] to-[#D95400] shadow-[#D95400]/30' },
   ];
 
   const currentGradient = avatarStyles.find((s) => s.id === profile.avatarStyle)?.gradient || avatarStyles[0].gradient;
@@ -143,16 +143,16 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
     <div className="w-full max-w-5xl mx-auto py-6 px-4 animate-fadeIn font-mono">
       
       {/* Profile Header Card */}
-      <div className="bg-white dark:bg-[#0f172a]/95 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl mb-6">
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 pb-6 border-b border-slate-100 dark:border-slate-800">
+      <div className="bg-white dark:bg-[#111111] border border-[#E5E5E5] dark:border-[#2A2A2A] rounded-xl p-6 sm:p-8 shadow-xl mb-6">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 pb-6 border-b border-[#E5E5E5] dark:border-[#2A2A2A]">
           
           {/* Avatar with selected gradient */}
-          <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${currentGradient} text-slate-950 font-extrabold text-2xl flex items-center justify-center shadow-lg`}>
+          <div className={`w-20 h-20 rounded-xl bg-gradient-to-br ${currentGradient} text-black font-black text-2xl flex items-center justify-center shadow-lg`}>
             {initials}
           </div>
 
           <div className="flex-1 text-center sm:text-left">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-cyan-500 bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded-full inline-block mb-1">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#FF5A00] bg-[#FF5A00]/10 border border-[#FF5A00]/30 px-2 py-0.5 rounded-full inline-block mb-1">
               LOCAL COMPETITOR PROFILE
             </span>
 
@@ -165,24 +165,24 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                     value={nameInput}
                     onChange={(e) => setNameInput(e.target.value)}
                     maxLength={20}
-                    className="bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 px-3 py-1 rounded-xl text-lg font-bold text-slate-900 dark:text-white"
+                    className="bg-[#F7F7F7] dark:bg-[#080808] border border-[#E5E5E5] dark:border-[#2A2A2A] px-3 py-1 rounded-lg text-lg font-bold text-[#111111] dark:text-white focus:outline-none focus:border-[#FF5A00]"
                     autoFocus
                   />
                   <button
                     onClick={saveName}
-                    className="p-1.5 rounded-lg bg-cyan-500 text-slate-950 hover:bg-cyan-400"
+                    className="p-1.5 rounded-lg bg-[#FF5A00] text-black hover:brightness-110 font-bold"
                   >
                     <Check className="w-4 h-4" />
                   </button>
                 </div>
               ) : (
                 <>
-                  <h2 className="text-2xl font-black text-slate-900 dark:text-white">
+                  <h2 className="text-2xl font-black text-[#111111] dark:text-white">
                     {profile.displayName}
                   </h2>
                   <button
                     onClick={() => setIsEditingName(true)}
-                    className="p-1 rounded-lg text-slate-400 hover:text-cyan-500 transition-colors"
+                    className="p-1 rounded-lg text-[#666666] dark:text-[#A1A1AA] hover:text-[#FF5A00] transition-colors"
                     title="Edit display name"
                   >
                     <Edit3 className="w-4 h-4" />
@@ -191,19 +191,19 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               )}
             </div>
 
-            <p className="text-xs text-slate-500 font-sans">
+            <p className="text-xs text-[#666666] dark:text-[#A1A1AA] font-sans">
               Welcome back, {profile.displayName}. All performance telemetry is computed locally in this browser.
             </p>
 
             {/* Avatar Style Picker */}
             <div className="flex items-center justify-center sm:justify-start gap-2 mt-3">
-              <span className="text-[10px] text-slate-400 uppercase">Avatar Color:</span>
+              <span className="text-[10px] text-[#666666] dark:text-[#71717A] uppercase font-bold">Avatar Color:</span>
               {avatarStyles.map((style) => (
                 <button
                   key={style.id}
                   onClick={() => onUpdateProfile({ avatarStyle: style.id })}
                   className={`w-5 h-5 rounded-full bg-gradient-to-br ${style.gradient} transition-transform ${
-                    profile.avatarStyle === style.id ? 'scale-125 ring-2 ring-cyan-400' : 'opacity-70 hover:opacity-100'
+                    profile.avatarStyle === style.id ? 'scale-125 ring-2 ring-[#FF5A00]' : 'opacity-70 hover:opacity-100'
                   }`}
                   title={style.label}
                 />
@@ -214,37 +214,37 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
         {/* Quick Stats Matrix */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-6">
-          <div className="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-100 dark:border-slate-800">
-            <span className="text-[10px] text-slate-400 uppercase">Tests Completed</span>
-            <div className="text-2xl font-black text-slate-900 dark:text-white mt-0.5">{testsCompleted}</div>
+          <div className="p-3 bg-[#F7F7F7] dark:bg-[#080808] rounded-lg border border-[#E5E5E5] dark:border-[#2A2A2A]">
+            <span className="text-[10px] text-[#666666] dark:text-[#71717A] uppercase font-bold">Tests Completed</span>
+            <div className="text-2xl font-black text-[#111111] dark:text-white mt-0.5">{testsCompleted}</div>
           </div>
 
-          <div className="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-100 dark:border-slate-800">
-            <span className="text-[10px] text-slate-400 uppercase">Average Speed</span>
-            <div className="text-2xl font-black text-cyan-500 mt-0.5">{avgWpm} <span className="text-xs text-slate-400">WPM</span></div>
+          <div className="p-3 bg-[#F7F7F7] dark:bg-[#080808] rounded-lg border border-[#E5E5E5] dark:border-[#2A2A2A]">
+            <span className="text-[10px] text-[#666666] dark:text-[#71717A] uppercase font-bold">Average Speed</span>
+            <div className="text-2xl font-black text-[#FF5A00] mt-0.5">{avgWpm} <span className="text-xs text-[#666666] dark:text-[#71717A]">WPM</span></div>
           </div>
 
-          <div className="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-100 dark:border-slate-800">
-            <span className="text-[10px] text-slate-400 uppercase">Average Accuracy</span>
-            <div className="text-2xl font-black text-slate-900 dark:text-white mt-0.5">{avgAcc}%</div>
+          <div className="p-3 bg-[#F7F7F7] dark:bg-[#080808] rounded-lg border border-[#E5E5E5] dark:border-[#2A2A2A]">
+            <span className="text-[10px] text-[#666666] dark:text-[#71717A] uppercase font-bold">Average Accuracy</span>
+            <div className="text-2xl font-black text-[#FF6E1A] mt-0.5">{avgAcc}%</div>
           </div>
 
-          <div className="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-100 dark:border-slate-800">
-            <span className="text-[10px] text-slate-400 uppercase">Total Time Typing</span>
-            <div className="text-2xl font-black text-slate-900 dark:text-white mt-0.5">{totalMinutes} <span className="text-xs text-slate-400">min</span></div>
+          <div className="p-3 bg-[#F7F7F7] dark:bg-[#080808] rounded-lg border border-[#E5E5E5] dark:border-[#2A2A2A]">
+            <span className="text-[10px] text-[#666666] dark:text-[#71717A] uppercase font-bold">Total Time Typing</span>
+            <div className="text-2xl font-black text-[#111111] dark:text-white mt-0.5">{totalMinutes} <span className="text-xs text-[#666666] dark:text-[#71717A]">min</span></div>
           </div>
         </div>
       </div>
 
       {/* Personal Goal Progress Card */}
-      <div className="bg-white dark:bg-[#0f172a]/95 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl mb-6">
+      <div className="bg-white dark:bg-[#111111] border border-[#E5E5E5] dark:border-[#2A2A2A] rounded-xl p-6 sm:p-8 shadow-xl mb-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
           <div>
-            <h3 className="text-sm font-bold uppercase text-slate-900 dark:text-white flex items-center gap-1.5">
-              <Target className="w-4 h-4 text-cyan-500" />
+            <h3 className="text-sm font-bold uppercase text-[#111111] dark:text-white flex items-center gap-1.5">
+              <Target className="w-4 h-4 text-[#FF5A00]" />
               Active Goal
             </h3>
-            <span className="text-xs text-slate-400 font-sans">
+            <span className="text-xs text-[#666666] dark:text-[#A1A1AA] font-sans">
               Choose your current objective to track automated progress.
             </span>
           </div>
@@ -256,8 +256,8 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 onClick={() => onUpdateProfile({ selectedGoalId: g.id })}
                 className={`px-3 py-1 rounded-lg text-xs font-bold border transition-all ${
                   selectedGoal.id === g.id
-                    ? 'bg-cyan-500 text-slate-950 border-cyan-400 shadow-sm'
-                    : 'bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-400 hover:text-white'
+                    ? 'bg-[#FF5A00] text-black border-[#FF5A00] shadow-sm font-black'
+                    : 'bg-[#F7F7F7] dark:bg-[#080808] border-[#E5E5E5] dark:border-[#2A2A2A] text-[#666666] dark:text-[#A1A1AA] hover:text-[#111111] dark:hover:text-white'
                 }`}
               >
                 {g.title}
@@ -266,16 +266,16 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           </div>
         </div>
 
-        <div className="p-4 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-100 dark:border-slate-800">
+        <div className="p-4 bg-[#F7F7F7] dark:bg-[#080808] rounded-lg border border-[#E5E5E5] dark:border-[#2A2A2A]">
           <div className="flex justify-between items-baseline mb-2">
-            <span className="text-xs text-slate-500 font-bold">{selectedGoal.title}</span>
-            <span className="text-sm font-black text-cyan-500">
+            <span className="text-xs text-[#666666] dark:text-[#A1A1AA] font-bold">{selectedGoal.title}</span>
+            <span className="text-sm font-black text-[#FF5A00]">
               CURRENT: {currentVal} {selectedGoal.type === 'wpm' ? 'WPM' : '%'} · GOAL: {selectedGoal.target} ({goalProgress}%)
             </span>
           </div>
-          <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden">
+          <div className="w-full bg-[#E5E5E5] dark:bg-[#2A2A2A] rounded-full h-2.5 overflow-hidden">
             <div
-              className="bg-gradient-to-r from-cyan-400 to-blue-500 h-full rounded-full transition-all duration-300"
+              className="bg-[#FF5A00] h-full rounded-full transition-all duration-300 shadow-sm shadow-[#FF5A00]/40"
               style={{ width: `${goalProgress}%` }}
             />
           </div>
@@ -283,18 +283,18 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       </div>
 
       {/* Achievements Showcase */}
-      <div className="bg-white dark:bg-[#0f172a]/95 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl">
-        <div className="flex items-center justify-between mb-6 pb-3 border-b border-slate-100 dark:border-slate-800">
+      <div className="bg-white dark:bg-[#111111] border border-[#E5E5E5] dark:border-[#2A2A2A] rounded-xl p-6 sm:p-8 shadow-xl">
+        <div className="flex items-center justify-between mb-6 pb-3 border-b border-[#E5E5E5] dark:border-[#2A2A2A]">
           <div>
-            <h3 className="text-sm font-bold uppercase text-slate-900 dark:text-white flex items-center gap-1.5">
-              <Trophy className="w-4 h-4 text-amber-500" />
+            <h3 className="text-sm font-bold uppercase text-[#111111] dark:text-white flex items-center gap-1.5">
+              <Trophy className="w-4 h-4 text-[#FF5A00]" />
               Achievements Showcase
             </h3>
-            <span className="text-xs text-slate-400 font-sans">
+            <span className="text-xs text-[#666666] dark:text-[#A1A1AA] font-sans">
               Unlocked based on verified local test telemetry.
             </span>
           </div>
-          <span className="text-xs text-slate-400">
+          <span className="text-xs text-[#666666] dark:text-[#71717A]">
             {achievements.filter((a) => a.unlockedAt).length} / {achievements.length} Unlocked
           </span>
         </div>
@@ -305,25 +305,25 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             return (
               <div
                 key={item.id}
-                className={`p-4 rounded-2xl border transition-all ${
+                className={`p-4 rounded-lg border transition-all ${
                   isUnlocked
-                    ? 'bg-cyan-500/10 border-cyan-500/40 shadow-sm'
-                    : 'bg-slate-50 dark:bg-slate-900/30 border-slate-200 dark:border-slate-800/60 opacity-50'
+                    ? 'bg-[#FF5A00]/10 border-[#FF5A00]/40 shadow-sm'
+                    : 'bg-[#F7F7F7] dark:bg-[#080808] border-[#E5E5E5] dark:border-[#2A2A2A] opacity-50'
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <div className={`p-2 rounded-xl ${isUnlocked ? 'bg-cyan-500/20 text-cyan-400' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'}`}>
+                  <div className={`p-2 rounded-lg ${isUnlocked ? 'bg-[#FF5A00]/20 text-[#FF5A00]' : 'bg-[#E5E5E5] dark:bg-[#2A2A2A] text-[#666666] dark:text-[#71717A]'}`}>
                     {isUnlocked ? <Sparkles className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
                   </div>
-                  <span className="text-[9px] font-bold uppercase font-mono px-1.5 py-0.5 rounded border border-current opacity-70">
+                  <span className={`text-[9px] font-bold uppercase font-mono px-1.5 py-0.5 rounded border ${isUnlocked ? 'border-[#FF5A00]/40 text-[#FF5A00]' : 'border-[#E5E5E5] dark:border-[#2A2A2A] text-[#666666] dark:text-[#71717A]'}`}>
                     {isUnlocked ? 'UNLOCKED' : 'LOCKED'}
                   </span>
                 </div>
 
-                <div className="font-bold text-xs text-slate-900 dark:text-white mb-1">
+                <div className="font-bold text-xs text-[#111111] dark:text-white mb-1">
                   {item.title}
                 </div>
-                <div className="text-[11px] text-slate-500 dark:text-slate-400 font-sans line-clamp-2">
+                <div className="text-[11px] text-[#666666] dark:text-[#A1A1AA] font-sans line-clamp-2">
                   {item.description}
                 </div>
               </div>

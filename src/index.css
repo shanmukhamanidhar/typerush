@@ -1,19 +1,74 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --color-bg: #F7F6F2;
+  --color-surface: #F0EEE9;
+  --color-card: #F7F6F2;
+  --color-border: #D8D6D1;
+  --color-text: #111111;
+  --color-text-secondary: #6F6F6F;
+  --color-primary: #FF5A00;
+  --color-orange: #FF5A00;
+  --color-orange-hover: #FF6E1A;
+  --color-orange-highlight: rgba(255, 90, 0, 0.12);
+  --color-success: #FF5A00;
+  --color-error: #FF3B5C;
+}
+
+.dark {
+  --color-bg: #080808;
+  --color-surface: #101010;
+  --color-card: #080808;
+  --color-border: #242424;
+  --color-text: #F5F5F5;
+  --color-text-secondary: #888888;
+  --color-primary: #FF5A00;
+  --color-orange: #FF5A00;
+  --color-orange-hover: #FF6E1A;
+  --color-orange-highlight: rgba(255, 90, 0, 0.12);
+  --color-success: #FF5A00;
+  --color-error: #FF3B5C;
+}
+
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-900 dark:bg-[#090d16] dark:text-slate-100 transition-colors duration-200 antialiased font-sans min-h-screen selection:bg-cyan-500/30 selection:text-cyan-600 dark:selection:text-cyan-300;
+    @apply bg-[#F7F6F2] text-[#111111] dark:bg-[#080808] dark:text-[#F5F5F5] transition-colors duration-150 antialiased font-sans min-h-screen selection:bg-[#FF5A00]/20 selection:text-[#FF5A00];
   }
+}
+
+/* Distraction-free clean surfaces */
+
+
+body.bg-pattern-dots {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.07) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.dark body.bg-pattern-dots,
+body.dark.bg-pattern-dots {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+body.bg-pattern-scanlines {
+  background: linear-gradient(rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.05) 50%), linear-gradient(90deg, rgba(255, 90, 0, 0.015), rgba(255, 122, 24, 0.015));
+  background-size: 100% 3px, 6px 100%;
+}
+
+.dark body.bg-pattern-scanlines,
+body.dark.bg-pattern-scanlines {
+  background: linear-gradient(rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 90, 0, 0.02), rgba(255, 122, 24, 0.02));
+  background-size: 100% 3px, 6px 100%;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(4px);
   }
   to {
     opacity: 1;
@@ -22,13 +77,13 @@
 }
 
 .animate-fadeIn {
-  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Custom minimal scrollbar */
+/* Custom minimal technical scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -36,10 +91,46 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.2);
-  border-radius: 9999px;
+  background: #E5E5E5;
+  border-radius: 2px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #222222;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.4);
+  background: #FF5A00;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #FF5A00;
+}
+
+/* Precision Subtle Orange Glows */
+.glow-orange {
+  text-shadow: 0 0 16px rgba(255, 90, 0, 0.35);
+}
+
+.shadow-glow-orange {
+  box-shadow: 0 0 20px -2px rgba(255, 90, 0, 0.20);
+}
+
+.bg-ambient-orange {
+  background: radial-gradient(circle at 50% -10%, rgba(255, 90, 0, 0.08) 0%, rgba(255, 90, 0, 0.02) 40%, transparent 70%);
+}
+
+.bg-subtle-orange {
+  background-color: rgba(255, 90, 0, 0.06);
+}
+
+/* Alias glow-cyan / glow-violet to precision orange glow */
+.glow-cyan,
+.glow-violet {
+  text-shadow: 0 0 16px rgba(255, 90, 0, 0.35);
+}
+
+.shadow-glow-cyan,
+.shadow-glow-violet {
+  box-shadow: 0 0 20px -2px rgba(255, 90, 0, 0.20);
 }

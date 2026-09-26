@@ -1,7 +1,7 @@
 # ⚡ TYPERUSH: Professional Typing & Keyboard Diagnostic Platform
 
 > **Type faster. Think sharper.**
-> *A championship-grade typing speed suite, professional hardware keyboard tester, and real-time 1v1 multiplayer arena powered by Supabase Realtime Channels.*
+> *A championship-grade typing speed suite, professional hardware keyboard tester, and scalable real-time multiplayer racing arena powered by Supabase Realtime Channels.*
 
 ---
 
@@ -17,7 +17,7 @@ npm run dev
 
 Open your browser to: **`http://localhost:5173`**
 
-*(For 1v1 multiplayer testing, simply open two browser windows or tabs side-by-side to race in real time!)*
+*(For multiplayer testing, simply open multiple browser windows or tabs side-by-side to race in real time!)*
 
 ---
 
@@ -27,14 +27,14 @@ TYPERUSH is organized into three major technical systems accessible via the prim
 
 1. **TYPING**: Multi-mode typing speed, accuracy, and cadence testing suite.
 2. **KEYBOARD TESTER**: Professional physical keyboard diagnostic and matrix testing tool.
-3. **1V1 RACE**: Real-time multiplayer typing race powered by Supabase Realtime with local dual-window fallback.
+3. **MULTIPLAYER RACE**: Real-time scalable multiplayer typing race (2, 3, 4, 6, 8, 12 players) powered by Supabase Realtime with local multi-tab fallback.
 
 ---
 
 ## ⌨️ 1. Complete Typing Engine & Test Modes
 
 ### Test Modes
-* **TIME MODE**: 15s (Sprint), 30s (Standard), and 60s (Endurance).
+* **TIME MODE**: 15s (Sprint), 30s (Standard), 60s (Endurance), and 120s.
 * **WORDS MODE**: 10, 25, 50, or 100 words. Timer runs as a secondary metric; the test ends when the target word count is completed (`"23 / 50 words"`).
 * **QUOTE MODE**: Curated library of famous quotations with subtle author attribution (e.g. *“The future depends on what you do today.” — Mahatma Gandhi*).
 * **CODE MODE**: Developer-focused snippets in **C, C++, Python, JavaScript, Java, HTML, CSS, and SQL**. Preserves indentation, brackets (`{}`, `[]`, `()`, `<>`), and symbols without distracting color clashes.
@@ -61,7 +61,7 @@ A dedicated diagnostic tool for inspecting physical keyboards and switch behavio
 * **Key States**:
   - `Untested` (Neutral)
   - `Pressed` (Active cyan highlight)
-  - `Tested` (Success emerald highlight)
+  - `Tested` (Tested state highlight)
   - `Stuck` (Alert state for keys held longer than 3.5s)
 * **Simultaneous Rollover Test**: Live simultaneous input buffer measuring concurrent key presses (2-key, 3-key, 4-key, 6-key, custom).
 * **Anti-Ghosting Verification Matrix**: Compares expected key clusters (WASD, QWE, Shift+Space+W) against detected keys and flags unexpected phantom signals.
@@ -70,19 +70,21 @@ A dedicated diagnostic tool for inspecting physical keyboards and switch behavio
 
 ---
 
-## 🏁 3. Real-Time 1v1 Multiplayer Races (Supabase Realtime)
+## 🏁 3. Real-Time Scalable Multiplayer Races (Supabase Realtime)
 
-A true real-time head-to-head racing system:
+A true real-time competitive racing system supporting 2 to 12 simultaneous racers:
 
 * **Room System**: Host generates a 5-digit room code (e.g., `X7K92`) with one-click code copy and direct invite links.
-* **1v1 Lobby**: Displays both competitors, host controls (duration, difficulty, mode), and Ready/Unready states.
-* **Same Passage Guarantee**: Both competitors race on the exact same passage.
-* **Synchronized Countdown**: Shared 3-2-1-GO countdown using synchronized timestamps.
-* **Live Head-to-Head Track**: Shows your typing passage and live WPM alongside your opponent's live progress bar (`████████░░ 82%`) and live velocity.
-* **Race Results & Rematch**: Winner podium celebration, head-to-head comparison stats, and a **REMATCH** button to immediately duel again with a new passage.
+* **Multiplayer Lobby**: Full participant roster with avatars, connection status, Ready/Unready states, and host controls (max capacity, duration, difficulty, word set).
+* **Same Passage Guarantee**: All competitors race simultaneously on the exact same passage.
+* **Synchronized Countdown**: Shared 3-2-1-GO countdown using synchronized timestamps and audio beeps.
+* **Multi-Lane Visual Track**: Shows every participant's live runner track with their current lead position (`#1`, `#2`, `#3`...), WPM, and progress percentage.
+* **Live Standings HUD**: Dynamic leaderboard that re-sorts in real time as racers overtake each other.
+* **Disconnect Resilience**: Gracefully handles disconnected racers without interrupting active competitors.
+* **Podium Results & Rematch**: Winner podium celebration, full match standings table, and a **REMATCH** button to immediately race again with a fresh passage in the same room.
 * **Supabase Integration**:
-  - Connects to Supabase Realtime Channels (`broadcast` and `presence`) when `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are provided (or entered in Settings).
-  - Automatically falls back to an embedded `BroadcastChannel` engine so opening two tabs or windows races locally with zero configuration!
+  - Connects to Supabase Realtime Channels (`broadcast`) when `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are provided.
+  - Automatically falls back to an embedded `BroadcastChannel` engine so opening multiple tabs or windows races locally with zero configuration!
 
 ---
 
@@ -156,6 +158,32 @@ src/
     ├── expandedAnalytics.ts        # Session ratings, smart insights, heatmap, word analysis
     └── typingMetrics.ts            # Net/Raw WPM, accuracy, consistency, and score math
 ```
+
+---
+
+## 🗄️ Supabase Multi-User Cloud Setup & Architecture
+
+TypeRush includes a complete multi-user cloud architecture with Supabase Authentication, PostgreSQL database, and Row Level Security:
+
+### 1. Environment Configuration
+Create a `.env` file (see `.env.example`):
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+```
+
+### 2. Database Migration
+Run the SQL migration in `supabase/schema.sql` directly inside your **Supabase SQL Editor**:
+- Creates `public.profiles` with automatic new user profile creation triggers.
+- Creates `public.typing_results` for cloud history and leaderboards.
+- Creates `public.multiplayer_matches` and `public.multiplayer_results`.
+- Sets up high-performance indexes on `(mode, duration, wpm DESC)` and `(user_id)`.
+- Configures Row Level Security (RLS) policies allowing users to manage only their own data while making leaderboards publicly readable.
+
+### 3. Vercel Deployment
+In your Vercel project dashboard under **Settings > Environment Variables**, add:
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
 
 ---
 

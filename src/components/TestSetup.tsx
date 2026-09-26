@@ -13,34 +13,56 @@ import {
   Code, 
   FileEdit, 
   Target,
-  Coffee
+  Coffee,
+  Hash,
+  Globe,
+  Sliders,
+  AlertTriangle,
+  Play,
+  Flame,
+  ArrowRight
 } from 'lucide-react';
 import { 
-  TestDuration, 
-  WordCountOption, 
   Difficulty, 
+  DifficultyRule,
   Category, 
   TestMode, 
-  CodeLanguage 
+  CodeLanguage,
+  QuoteLength,
+  LanguageCode,
+  WordSetSize
 } from '../types/typing';
 
 interface TestSetupProps {
   mode: TestMode;
   onSelectMode: (m: TestMode) => void;
-  duration: TestDuration;
-  onSelectDuration: (d: TestDuration) => void;
-  wordCount: WordCountOption;
-  onSelectWordCount: (w: WordCountOption) => void;
+  duration: number;
+  onSelectDuration: (d: number) => void;
+  wordCount: number;
+  onSelectWordCount: (w: number) => void;
+  quoteLength: QuoteLength;
+  onSelectQuoteLength: (ql: QuoteLength) => void;
   difficulty: Difficulty;
   onSelectDifficulty: (d: Difficulty) => void;
+  difficultyRule: DifficultyRule;
+  onSelectDifficultyRule: (rule: DifficultyRule) => void;
   category: Category;
   onSelectCategory: (c: Category) => void;
   codeLanguage: CodeLanguage;
   onSelectCodeLanguage: (lang: CodeLanguage) => void;
   customText: string;
   onChangeCustomText: (text: string) => void;
+  punctuation: boolean;
+  onTogglePunctuation: () => void;
+  numbers: boolean;
+  onToggleNumbers: () => void;
+  language: LanguageCode;
+  onSelectLanguage: (lang: LanguageCode) => void;
+  wordSet: WordSetSize;
+  onSelectWordSet: (ws: WordSetSize) => void;
   onStartTest: () => void;
   onQuickTest: () => void;
+  onOpenPracticeModal: () => void;
 }
 
 export const TestSetup: React.FC<TestSetupProps> = ({
@@ -50,18 +72,35 @@ export const TestSetup: React.FC<TestSetupProps> = ({
   onSelectDuration,
   wordCount,
   onSelectWordCount,
+  quoteLength,
+  onSelectQuoteLength,
   difficulty,
   onSelectDifficulty,
+  difficultyRule,
+  onSelectDifficultyRule,
   category,
   onSelectCategory,
   codeLanguage,
   onSelectCodeLanguage,
   customText,
   onChangeCustomText,
+  punctuation,
+  onTogglePunctuation,
+  numbers,
+  onToggleNumbers,
+  language,
+  onSelectLanguage,
+  wordSet,
+  onSelectWordSet,
   onStartTest,
   onQuickTest,
+  onOpenPracticeModal,
 }) => {
   const [customError, setCustomError] = useState<string | null>(null);
+  const [isCustomDurationInput, setIsCustomDurationInput] = useState<boolean>(false);
+  const [customDurationVal, setCustomDurationVal] = useState<string>(duration.toString());
+  const [isCustomWordCountInput, setIsCustomWordCountInput] = useState<boolean>(false);
+  const [customWordCountVal, setCustomWordCountVal] = useState<string>(wordCount.toString());
 
   const testModes: { id: TestMode; label: string; icon: React.ReactNode }[] = [
     { id: 'time', label: 'Time', icon: <Timer className="w-3.5 h-3.5" /> },
@@ -69,331 +108,420 @@ export const TestSetup: React.FC<TestSetupProps> = ({
     { id: 'quote', label: 'Quote', icon: <Quote className="w-3.5 h-3.5" /> },
     { id: 'code', label: 'Code', icon: <Code className="w-3.5 h-3.5" /> },
     { id: 'custom', label: 'Custom', icon: <FileEdit className="w-3.5 h-3.5" /> },
+    { id: 'zen', label: 'Zen', icon: <Sparkles className="w-3.5 h-3.5" /> },
     { id: 'practice', label: 'Practice', icon: <Coffee className="w-3.5 h-3.5" /> },
   ];
 
-  const durations: { value: TestDuration; label: string; desc: string }[] = [
+  const durations = [
     { value: 15, label: '15s', desc: 'Sprint' },
     { value: 30, label: '30s', desc: 'Standard' },
     { value: 60, label: '60s', desc: 'Endurance' },
+    { value: 120, label: '120s', desc: 'Extended' },
+    { value: 180, label: '180s', desc: 'Marathon' },
   ];
 
-  const wordCounts: { value: WordCountOption; label: string }[] = [
-    { value: 10, label: '10 Words' },
-    { value: 25, label: '25 Words' },
-    { value: 50, label: '50 Words' },
-    { value: 100, label: '100 Words' },
+  const wordCounts = [10, 25, 50, 100, 200, 500, 1000];
+
+  const languagesList: { id: LanguageCode; label: string }[] = [
+    { id: 'en', label: 'English' },
+    { id: 'en-gb', label: 'British' },
+    { id: 'es', label: 'Spanish' },
+    { id: 'fr', label: 'French' },
+    { id: 'de', label: 'German' },
+    { id: 'it', label: 'Italian' },
+    { id: 'pt', label: 'Portuguese' },
+    { id: 'nl', label: 'Dutch' },
+    { id: 'ja-ro', label: 'Japanese Romaji' },
   ];
 
-  const languages: { id: CodeLanguage; label: string }[] = [
+  const codeLanguages: { id: CodeLanguage; label: string }[] = [
+    { id: 'javascript', label: 'JavaScript' },
+    { id: 'typescript', label: 'TypeScript' },
+    { id: 'python', label: 'Python' },
     { id: 'c', label: 'C' },
     { id: 'cpp', label: 'C++' },
-    { id: 'python', label: 'Python' },
-    { id: 'javascript', label: 'JavaScript' },
     { id: 'java', label: 'Java' },
+    { id: 'rust', label: 'Rust' },
+    { id: 'go', label: 'Go' },
     { id: 'html', label: 'HTML' },
     { id: 'css', label: 'CSS' },
     { id: 'sql', label: 'SQL' },
   ];
 
-  const difficulties: { value: Difficulty; label: string; desc: string; badge: string }[] = [
-    { value: 'easy', label: 'Easy', desc: 'Common words & simple sentences', badge: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20' },
-    { value: 'medium', label: 'Medium', desc: 'Standard varied vocabulary', badge: 'text-cyan-500 bg-cyan-500/10 border-cyan-500/20' },
-    { value: 'hard', label: 'Hard', desc: 'Technical terms & punctuation', badge: 'text-rose-500 bg-rose-500/10 border-rose-500/20' },
+  const quoteLengths: { id: QuoteLength; label: string; desc: string }[] = [
+    { id: 'short', label: 'Short', desc: '< 80 chars' },
+    { id: 'medium', label: 'Medium', desc: '80 - 180 chars' },
+    { id: 'long', label: 'Long', desc: '> 180 chars' },
+    { id: 'random', label: 'Random', desc: 'All lengths' },
   ];
 
-  const categories: { value: Category; label: string; icon: React.ReactNode }[] = [
-    { value: 'general', label: 'General', icon: <BookOpen className="w-3.5 h-3.5" /> },
-    { value: 'technology', label: 'Technology', icon: <Cpu className="w-3.5 h-3.5" /> },
-    { value: 'science', label: 'Science', icon: <FlaskConical className="w-3.5 h-3.5" /> },
-    { value: 'programming', label: 'Programming', icon: <Terminal className="w-3.5 h-3.5" /> },
-    { value: 'random', label: 'Random', icon: <Shuffle className="w-3.5 h-3.5" /> },
+  const difficultyRules: { id: DifficultyRule; label: string; badge: string; desc: string }[] = [
+    { id: 'normal', label: 'Normal', badge: 'text-[#FF5A00] bg-[#FF5A00]/10 border border-[#FF5A00]', desc: 'Standard typing with real-time feedback' },
+    { id: 'expert', label: 'Expert', badge: 'text-[#FF6E1A] bg-[#FF6E1A]/10 border border-[#FF6E1A]', desc: 'Submitting a mistyped word fails immediately' },
+    { id: 'master', label: 'Master', badge: 'text-[#D95400] bg-[#D95400]/10 border border-[#D95400]', desc: 'Any single incorrect key immediately fails test' },
   ];
 
   const handleStartCustom = () => {
     const trimmed = customText.trim();
-    if (trimmed.length < 15) {
-      setCustomError('Custom passage must contain at least 15 characters.');
-      return;
-    }
-    if (trimmed.length > 1200) {
-      setCustomError('Custom passage exceeds maximum length of 1200 characters.');
+    if (trimmed.length < 10) {
+      setCustomError('Custom passage must contain at least 10 characters.');
       return;
     }
     setCustomError(null);
     onStartTest();
   };
 
+  const handleApplyCustomDuration = () => {
+    const val = parseInt(customDurationVal, 10);
+    if (!isNaN(val) && val >= 5 && val <= 3600) {
+      onSelectDuration(val);
+      setIsCustomDurationInput(false);
+    }
+  };
+
+  const handleApplyCustomWordCount = () => {
+    const val = parseInt(customWordCountVal, 10);
+    if (!isNaN(val) && val >= 5 && val <= 5000) {
+      onSelectWordCount(val);
+      setIsCustomWordCountInput(false);
+    }
+  };
+
   return (
-    <div className="w-full max-w-4xl mx-auto flex flex-col items-center text-center py-6 px-4 animate-fadeIn">
+    <div className="w-full max-w-4xl mx-auto flex flex-col items-center text-center py-4 px-4 animate-fadeIn font-mono">
       {/* Hero Headline */}
-      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider text-cyan-500 bg-cyan-500/10 border border-cyan-500/20 mb-3">
-        <Sparkles className="w-3.5 h-3.5" />
+      <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-[#FF5A00] bg-[#FF5A00]/10 border border-[#FF5A00]/40 shadow-[0_0_12px_rgba(255,90,0,0.20)] mb-3">
+        <Sparkles className="w-3.5 h-3.5 text-[#FF5A00]" />
         <span>Precision Typing Lab</span>
       </div>
 
-      <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-2 font-sans">
-        How fast can you <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-500 to-blue-600">really type?</span>
+      <h1 className="text-3xl sm:text-5xl font-black text-[#111111] dark:text-[#F5F5F5] tracking-tight mb-2.5 font-sans">
+        How fast can you <span className="text-[#FF5A00]">really type?</span>
       </h1>
       
-      <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-xl mb-6 leading-relaxed">
-        Challenge your speed, accuracy and consistency. Choose between time sprints, word goals, curated quotes, developer code, or free practice.
+      <p className="text-xs sm:text-sm text-[#6B6B6B] dark:text-[#A1A1AA] max-w-xl mb-6 leading-relaxed font-sans">
+        Challenge your speed, accuracy and consistency. Configure custom word sets, punctuation, numbers, rules, and code across 9 languages.
       </p>
 
-      {/* TOP PRIMARY MODE SELECTOR BAR */}
-      <div className="flex flex-wrap items-center justify-center gap-1.5 p-1.5 bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-lg mb-6 font-mono">
-        {testModes.map((item) => {
-          const isSelected = mode === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => onSelectMode(item.id)}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                isSelected
-                  ? 'bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/25'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
-              }`}
-            >
-              {item.icon}
-              <span className="uppercase">{item.label}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Dynamic Mode Settings Matrix */}
-      <div className="w-full bg-white dark:bg-[#0f172a]/90 border border-slate-200 dark:border-slate-800/80 rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/50 dark:shadow-black/40 backdrop-blur-md mb-8 transition-colors text-left font-mono">
+      {/* TOP PRIMARY CONFIGURATION BAR */}
+      <div className="w-full flex flex-col items-center gap-4 bg-white dark:bg-[#111111] border border-[#E5E5E5] dark:border-[#2A2A2A] rounded-2xl p-5 sm:p-6 shadow-md dark:shadow-none mb-8">
         
-        {/* TIME MODE OPTIONS */}
+        {/* ROW 1: PRIMARY TEST MODES */}
+        <div className="flex flex-wrap items-center justify-center gap-1.5 p-1.5 bg-[#F7F7F7] dark:bg-[#0A0A0A] rounded-xl border border-[#E5E5E5] dark:border-[#2A2A2A]">
+          {testModes.map((item) => {
+            const isSelected = mode === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => {
+                  if (item.id === 'practice') {
+                    onOpenPracticeModal();
+                  } else {
+                    onSelectMode(item.id);
+                  }
+                }}
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${
+                  isSelected
+                    ? 'bg-[#FF5A00] text-black shadow-[0_0_16px_rgba(255,90,0,0.25)]'
+                    : 'text-[#6B6B6B] hover:text-[#111111] dark:hover:text-[#F5F5F5] hover:bg-[#E5E5E5] dark:hover:bg-[#161616]'
+                }`}
+              >
+                {item.icon}
+                <span className="uppercase">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* ROW 2: DYNAMIC SUB-CONFIGURATIONS BASED ON ACTIVE MODE */}
+        
+        {/* SUB-OPTIONS FOR TIME MODE */}
         {mode === 'time' && (
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <Timer className="w-4 h-4 text-cyan-500" />
-                Duration (Seconds)
-              </span>
-              <span className="text-xs text-slate-500">{duration} Seconds Selected</span>
-            </div>
+          <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1">
+            <span className="text-[11px] font-bold text-[#6B6B6B] dark:text-[#A1A1AA] uppercase mr-1">Duration:</span>
+            {durations.map((d) => (
+              <button
+                key={d.value}
+                onClick={() => onSelectDuration(d.value)}
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                  duration === d.value && !isCustomDurationInput
+                    ? 'bg-[#FF5A00]/10 text-[#FF5A00] border border-[#FF5A00]'
+                    : 'bg-[#F7F7F7] dark:bg-[#161616] text-[#6B6B6B] dark:text-[#A1A1AA] border border-[#E5E5E5] dark:border-[#2A2A2A] hover:text-[#111111] dark:hover:text-white'
+                }`}
+              >
+                {d.label}
+              </button>
+            ))}
 
-            <div className="grid grid-cols-3 gap-3">
-              {durations.map((item) => {
-                const isSelected = duration === item.value;
-                return (
-                  <button
-                    key={item.value}
-                    onClick={() => onSelectDuration(item.value)}
-                    className={`p-3 sm:p-4 rounded-xl border text-left transition-all ${
-                      isSelected
-                        ? 'bg-cyan-500/10 border-cyan-500 text-cyan-400 shadow-md ring-1 ring-cyan-500/30'
-                        : 'bg-slate-50 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 text-slate-400 hover:border-slate-700'
-                    }`}
-                  >
-                    <div className="text-xl font-bold">{item.label}</div>
-                    <div className="text-[11px] font-sans text-slate-500 uppercase">{item.desc}</div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* WORDS MODE OPTIONS */}
-        {mode === 'words' && (
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <Target className="w-4 h-4 text-cyan-500" />
-                Target Word Count
-              </span>
-              <span className="text-xs text-slate-500">{wordCount} Words Goal</span>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {wordCounts.map((item) => {
-                const isSelected = wordCount === item.value;
-                return (
-                  <button
-                    key={item.value}
-                    onClick={() => onSelectWordCount(item.value)}
-                    className={`p-3.5 rounded-xl border text-center font-bold text-sm transition-all ${
-                      isSelected
-                        ? 'bg-cyan-500/10 border-cyan-500 text-cyan-400 shadow-md ring-1 ring-cyan-500/30'
-                        : 'bg-slate-50 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 text-slate-400 hover:border-slate-700'
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* CODE MODE OPTIONS */}
-        {mode === 'code' && (
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <Code className="w-4 h-4 text-cyan-500" />
-                Programming Language
-              </span>
-              <span className="text-xs text-slate-500 uppercase">{codeLanguage}</span>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {languages.map((lang) => {
-                const isSelected = codeLanguage === lang.id;
-                return (
-                  <button
-                    key={lang.id}
-                    onClick={() => onSelectCodeLanguage(lang.id)}
-                    className={`p-2.5 rounded-xl border text-xs font-bold text-center transition-all ${
-                      isSelected
-                        ? 'bg-cyan-500/10 border-cyan-500 text-cyan-400 shadow-sm ring-1 ring-cyan-500/30'
-                        : 'bg-slate-50 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 text-slate-400 hover:border-slate-700'
-                    }`}
-                  >
-                    {lang.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* CUSTOM PASSAGE INPUT */}
-        {mode === 'custom' && (
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <FileEdit className="w-4 h-4 text-cyan-500" />
-                Paste or Type Custom Passage
-              </span>
-              <span className="text-xs text-slate-500">{customText.length} / 1200 characters</span>
-            </div>
-
-            <textarea
-              value={customText}
-              onChange={(e) => {
-                onChangeCustomText(e.target.value);
-                if (customError) setCustomError(null);
-              }}
-              rows={4}
-              placeholder="Paste or type your custom text here. (Pasting is permitted here in setup, but prohibited during the live test)."
-              className="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm font-sans focus:outline-none focus:border-cyan-500"
-            />
-
-            {customError && (
-              <div className="text-xs text-rose-500 font-sans mt-2">
-                {customError}
+            {isCustomDurationInput ? (
+              <div className="flex items-center gap-1 bg-[#F7F7F7] dark:bg-[#161616] px-2 py-0.5 rounded-lg border border-[#FF5A00]">
+                <input
+                  type="number"
+                  min={5}
+                  max={3600}
+                  value={customDurationVal}
+                  onChange={e => setCustomDurationVal(e.target.value)}
+                  className="w-14 bg-transparent text-xs text-[#111111] dark:text-white focus:outline-none font-bold"
+                  placeholder="sec"
+                  autoFocus
+                />
+                <button
+                  onClick={handleApplyCustomDuration}
+                  className="text-[10px] font-bold text-[#FF5A00] hover:underline"
+                >
+                  SET
+                </button>
               </div>
+            ) : (
+              <button
+                onClick={() => setIsCustomDurationInput(true)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-all ${
+                  !durations.some(d => d.value === duration)
+                    ? 'bg-[#FF5A00]/10 text-[#FF5A00] border border-[#FF5A00]'
+                    : 'border-dashed border-[#E5E5E5] dark:border-[#2A2A2A] text-[#6B6B6B] dark:text-[#A1A1AA] hover:text-[#111111] dark:hover:text-white'
+                }`}
+              >
+                {!durations.some(d => d.value === duration) ? `${duration}s Custom` : 'Custom...'}
+              </button>
             )}
           </div>
         )}
 
-        {/* PRACTICE MODE NOTICE */}
-        {mode === 'practice' && (
-          <div className="mb-6 p-4 rounded-2xl bg-cyan-500/5 border border-cyan-500/20 text-xs font-sans text-slate-400 leading-relaxed">
-            <strong className="text-cyan-400 font-mono block mb-1">UNTIMED PRACTICE MODE:</strong>
-            Practice freely at your own pace without timer constraints. Net WPM and Accuracy will calculate continuously while you type.
+        {/* SUB-OPTIONS FOR WORDS MODE */}
+        {mode === 'words' && (
+          <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1">
+            <span className="text-[11px] font-bold text-[#6B6B6B] dark:text-[#A1A1AA] uppercase mr-1">Words:</span>
+            {wordCounts.map((wc) => (
+              <button
+                key={wc}
+                onClick={() => onSelectWordCount(wc)}
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                  wordCount === wc && !isCustomWordCountInput
+                    ? 'bg-[#FF5A00]/10 text-[#FF5A00] border border-[#FF5A00]'
+                    : 'bg-[#F7F7F7] dark:bg-[#161616] text-[#6B6B6B] dark:text-[#A1A1AA] border border-[#E5E5E5] dark:border-[#2A2A2A] hover:text-[#111111] dark:hover:text-white'
+                }`}
+              >
+                {wc}
+              </button>
+            ))}
+
+            {isCustomWordCountInput ? (
+              <div className="flex items-center gap-1 bg-[#F7F7F7] dark:bg-[#161616] px-2 py-0.5 rounded-lg border border-[#FF5A00]">
+                <input
+                  type="number"
+                  min={5}
+                  max={5000}
+                  value={customWordCountVal}
+                  onChange={e => setCustomWordCountVal(e.target.value)}
+                  className="w-14 bg-transparent text-xs text-[#111111] dark:text-white focus:outline-none font-bold"
+                  placeholder="words"
+                  autoFocus
+                />
+                <button
+                  onClick={handleApplyCustomWordCount}
+                  className="text-[10px] font-bold text-[#FF5A00] hover:underline"
+                >
+                  SET
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setIsCustomWordCountInput(true)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-all ${
+                  !wordCounts.includes(wordCount)
+                    ? 'bg-[#FF5A00]/10 text-[#FF5A00] border border-[#FF5A00]'
+                    : 'border-dashed border-[#E5E5E5] dark:border-[#2A2A2A] text-[#6B6B6B] dark:text-[#A1A1AA] hover:text-[#111111] dark:hover:text-white'
+                }`}
+              >
+                {!wordCounts.includes(wordCount) ? `${wordCount} Words` : 'Custom...'}
+              </button>
+            )}
           </div>
         )}
 
-        {/* DIFFICULTY SELECTOR (Visible for time, words, practice) */}
-        {(mode === 'time' || mode === 'words' || mode === 'practice') && (
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <Gauge className="w-4 h-4 text-cyan-500" />
-                Difficulty Level
-              </span>
-              <span className="text-xs text-slate-500 uppercase">{difficulty}</span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {difficulties.map((item) => {
-                const isSelected = difficulty === item.value;
-                return (
-                  <button
-                    key={item.value}
-                    onClick={() => onSelectDifficulty(item.value)}
-                    className={`p-3 rounded-xl border transition-all text-left ${
-                      isSelected
-                        ? 'bg-cyan-500/10 border-cyan-500 text-cyan-400 ring-1 ring-cyan-500/30'
-                        : 'bg-slate-50 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 text-slate-400 hover:border-slate-700'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-bold font-sans">{item.label}</span>
-                      <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border uppercase ${item.badge}`}>
-                        {item.value}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-500 font-sans mt-1 line-clamp-1">{item.desc}</p>
-                  </button>
-                );
-              })}
-            </div>
+        {/* SUB-OPTIONS FOR QUOTE MODE */}
+        {mode === 'quote' && (
+          <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1">
+            <span className="text-[11px] font-bold text-[#6B6B6B] dark:text-[#A1A1AA] uppercase mr-1">Length:</span>
+            {quoteLengths.map((q) => (
+              <button
+                key={q.id}
+                onClick={() => onSelectQuoteLength(q.id)}
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                  quoteLength === q.id
+                    ? 'bg-[#FF5A00]/10 text-[#FF5A00] border border-[#FF5A00]'
+                    : 'bg-[#F7F7F7] dark:bg-[#161616] text-[#6B6B6B] dark:text-[#A1A1AA] border border-[#E5E5E5] dark:border-[#2A2A2A] hover:text-[#111111] dark:hover:text-white'
+                }`}
+                title={q.desc}
+              >
+                {q.label}
+              </button>
+            ))}
           </div>
         )}
 
-        {/* CATEGORY SELECTOR (For time, words, practice) */}
-        {(mode === 'time' || mode === 'words' || mode === 'practice') && (
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <BookOpen className="w-4 h-4 text-cyan-500" />
-                Topic Category
-              </span>
-              <span className="text-xs text-slate-500 uppercase">{category}</span>
+        {/* SUB-OPTIONS FOR CODE MODE */}
+        {mode === 'code' && (
+          <div className="flex flex-wrap items-center justify-center gap-1 pt-1 max-w-2xl">
+            <span className="text-[11px] font-bold text-[#6B6B6B] dark:text-[#A1A1AA] uppercase mr-1">Language:</span>
+            {codeLanguages.map((cl) => (
+              <button
+                key={cl.id}
+                onClick={() => onSelectCodeLanguage(cl.id)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                  codeLanguage === cl.id
+                    ? 'bg-[#FF5A00] text-black font-black shadow-xs'
+                    : 'bg-[#F7F7F7] dark:bg-[#161616] text-[#6B6B6B] dark:text-[#A1A1AA] border border-[#E5E5E5] dark:border-[#2A2A2A] hover:text-[#111111] dark:hover:text-white'
+                }`}
+              >
+                {cl.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* SUB-OPTIONS FOR ZEN MODE */}
+        {mode === 'zen' && (
+          <div className="flex items-center gap-2 text-xs text-[#6B6B6B] dark:text-[#A1A1AA] py-1 font-sans">
+            <Sparkles className="w-4 h-4 text-[#FF5A00] shrink-0" />
+            <span>Continuous flow typing. Words replenish seamlessly. End whenever ready to view stats.</span>
+          </div>
+        )}
+
+        {/* ROW 3: MODIFIERS (Punctuation, Numbers, Language Dictionaries, Wordset, Difficulty Rule) */}
+        {(mode === 'time' || mode === 'words' || mode === 'zen') && (
+          <div className="w-full pt-3 mt-1 border-t border-[#E5E5E5] dark:border-[#2A2A2A] flex flex-wrap items-center justify-between gap-3 text-xs">
+            
+            {/* TOGGLES: Punctuation & Numbers */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={onTogglePunctuation}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold transition-all border ${
+                  punctuation
+                    ? 'bg-[#FF5A00]/10 border-[#FF5A00] text-[#FF5A00]'
+                    : 'border-[#E5E5E5] dark:border-[#2A2A2A] bg-[#F7F7F7] dark:bg-[#161616] text-[#6B6B6B] dark:text-[#A1A1AA] hover:text-[#111111] dark:hover:text-white'
+                }`}
+              >
+                <Hash className="w-3.5 h-3.5" />
+                <span>Punctuation {punctuation ? 'ON' : 'OFF'}</span>
+              </button>
+
+              <button
+                onClick={onToggleNumbers}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold transition-all border ${
+                  numbers
+                    ? 'bg-[#FF5A00]/10 border-[#FF5A00] text-[#FF5A00]'
+                    : 'border-[#E5E5E5] dark:border-[#2A2A2A] bg-[#F7F7F7] dark:bg-[#161616] text-[#6B6B6B] dark:text-[#A1A1AA] hover:text-[#111111] dark:hover:text-white'
+                }`}
+              >
+                <span>123</span>
+                <span>Numbers {numbers ? 'ON' : 'OFF'}</span>
+              </button>
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              {categories.map((item) => {
-                const isSelected = category === item.value;
-                return (
-                  <button
-                    key={item.value}
-                    onClick={() => onSelectCategory(item.value)}
-                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium border transition-all ${
-                      isSelected
-                        ? 'bg-cyan-500/15 border-cyan-500 text-cyan-400 shadow-sm'
-                        : 'bg-slate-50 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 text-slate-400 hover:border-slate-700 hover:text-white'
-                    }`}
-                  >
-                    {item.icon}
-                    <span>{item.label}</span>
-                  </button>
-                );
-              })}
+            {/* LANGUAGE & WORDSET SELECTORS */}
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1 bg-[#F7F7F7] dark:bg-[#161616] px-2.5 py-1 rounded-lg border border-[#E5E5E5] dark:border-[#2A2A2A]">
+                <Globe className="w-3.5 h-3.5 text-[#FF5A00] mr-1" />
+                <select
+                  value={language}
+                  onChange={e => onSelectLanguage(e.target.value as LanguageCode)}
+                  aria-label="Language Dictionary"
+                  className="bg-transparent text-xs text-[#111111] dark:text-white focus:outline-none cursor-pointer font-bold"
+                >
+                  {languagesList.map(l => (
+                    <option key={l.id} value={l.id} className="bg-white dark:bg-[#111111] text-[#111111] dark:text-white">
+                      {l.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex items-center gap-1 bg-[#F7F7F7] dark:bg-[#161616] px-2.5 py-1 rounded-lg border border-[#E5E5E5] dark:border-[#2A2A2A]">
+                <span className="text-[10px] text-[#6B6B6B] dark:text-[#A1A1AA] uppercase mr-1">Pool:</span>
+                <select
+                  value={wordSet}
+                  onChange={e => onSelectWordSet(e.target.value === 'extended' ? 'extended' : parseInt(e.target.value, 10) as WordSetSize)}
+                  aria-label="Vocabulary Word Set Size"
+                  className="bg-transparent text-xs text-[#111111] dark:text-white focus:outline-none cursor-pointer font-bold"
+                >
+                  <option value={200} className="bg-white dark:bg-[#111111] text-[#111111] dark:text-white">Top 200</option>
+                  <option value={500} className="bg-white dark:bg-[#111111] text-[#111111] dark:text-white">Top 500</option>
+                  <option value={1000} className="bg-white dark:bg-[#111111] text-[#111111] dark:text-white">Top 1000</option>
+                  <option value="extended" className="bg-white dark:bg-[#111111] text-[#111111] dark:text-white">Extended</option>
+                </select>
+              </div>
             </div>
+
+            {/* DIFFICULTY RULES (Normal, Expert, Master) */}
+            <div className="flex items-center gap-1 bg-[#F7F7F7] dark:bg-[#161616] p-0.5 rounded-lg border border-[#E5E5E5] dark:border-[#2A2A2A]">
+              {difficultyRules.map(r => (
+                <button
+                  key={r.id}
+                  onClick={() => onSelectDifficultyRule(r.id)}
+                  className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all ${
+                    difficultyRule === r.id
+                      ? r.badge
+                      : 'text-[#6B6B6B] dark:text-[#A1A1AA] hover:text-[#111111] dark:hover:text-white'
+                  }`}
+                  title={r.desc}
+                >
+                  {r.label}
+                </button>
+              ))}
+            </div>
+
           </div>
         )}
 
       </div>
 
-      {/* CTA Buttons */}
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-md">
+      {/* CUSTOM TEXT INPUT AREA IF CUSTOM MODE */}
+      {mode === 'custom' && (
+        <div className="w-full max-w-3xl mb-6 text-left">
+          <label className="text-xs font-bold text-[#6B6B6B] dark:text-[#A1A1AA] block mb-1.5">
+            Enter or paste your custom passage:
+          </label>
+          <textarea
+            rows={4}
+            value={customText}
+            onChange={e => onChangeCustomText(e.target.value)}
+            placeholder="Paste your own text snippet or practice drill here..."
+            className="w-full bg-white dark:bg-[#111111] border border-[#E5E5E5] dark:border-[#2A2A2A] rounded-xl p-4 text-xs font-mono text-[#111111] dark:text-white placeholder-[#6B6B6B] dark:placeholder-[#555555] focus:outline-none focus:border-[#FF5A00] shadow-xs"
+          />
+          {customError && (
+            <p className="text-xs text-[#D95400] font-bold mt-1">{customError}</p>
+          )}
+        </div>
+      )}
+
+      {/* START TEST CTAS */}
+      <div className="flex flex-col sm:flex-row items-center gap-3">
         <button
           onClick={mode === 'custom' ? handleStartCustom : onStartTest}
-          className="w-full sm:w-2/3 py-4 px-6 rounded-2xl font-bold font-sans text-base text-slate-950 bg-gradient-to-r from-cyan-400 via-cyan-300 to-sky-400 hover:from-cyan-300 hover:to-sky-300 shadow-lg shadow-cyan-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+          className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-black text-sm uppercase tracking-wider bg-[#FF5A00] text-black hover:bg-[#FF6E1A] shadow-[0_0_20px_rgba(255,90,0,0.30)] hover:shadow-[0_0_28px_rgba(255,90,0,0.45)] flex items-center justify-center gap-2 transform active:scale-95 transition-all"
         >
-          <Zap className="w-5 h-5 fill-current" />
-          <span>START {mode.toUpperCase()} TEST</span>
+          <Play className="w-4 h-4 fill-current" />
+          <span>START TEST (ENTER)</span>
         </button>
 
         <button
           onClick={onQuickTest}
-          className="w-full sm:w-1/3 py-4 px-5 rounded-2xl font-semibold font-sans text-sm text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-all flex items-center justify-center gap-1.5"
-          title="Instant 15-second sprint test"
+          className="w-full sm:w-auto px-5 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider text-[#FF5A00] hover:text-black hover:bg-[#FF5A00] bg-transparent dark:bg-[#111111]/60 border border-[#FF5A00]/40 hover:border-[#FF5A00] flex items-center justify-center gap-1.5 transition-all shadow-xs"
         >
-          <span>Quick 15s</span>
+          <Zap className="w-3.5 h-3.5 text-[#FF5A00] fill-current" />
+          <span>Quick 15s Sprint</span>
+        </button>
+
+        <button
+          onClick={onOpenPracticeModal}
+          className="w-full sm:w-auto px-5 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider text-[#FF5A00] hover:text-black hover:bg-[#FF5A00] bg-transparent dark:bg-[#111111]/60 border border-[#FF5A00]/40 hover:border-[#FF5A00] flex items-center justify-center gap-1.5 transition-all shadow-xs"
+        >
+          <Coffee className="w-3.5 h-3.5 text-[#FF5A00]" />
+          <span>Target Weaknesses</span>
         </button>
       </div>
 
-      <p className="text-xs text-slate-500 mt-4 font-mono">
-        💡 Pro-Tip: Press <kbd className="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-cyan-500">Enter</kbd> to launch immediately.
-      </p>
     </div>
   );
 };

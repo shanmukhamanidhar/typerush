@@ -228,6 +228,6 @@ export function getDeterministicDailyChallenge(dateStr: string): {
     id: `daily-${dateStr}`,
     passage: selectedPassage.text,
     difficulty: selectedPassage.difficulty === 'easy' ? 'medium' : selectedPassage.difficulty,
-    category: selectedPassage.category === 'programming' || selectedPassage.category === 'random' ? 'technology' : selectedPassage.category,
+    category: (selectedPassage.category === 'programming' || selectedPassage.category === 'random' || selectedPassage.category === 'quotes' || selectedPassage.category === 'numbers') ? 'technology' : selectedPassage.category,
   };
 }

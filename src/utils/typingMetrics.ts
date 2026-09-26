@@ -27,7 +27,7 @@ export function calculateRawWpm(totalTypedChars: number, elapsedSeconds: number)
  * Accuracy = (correct characters / total typed characters) * 100
  */
 export function calculateAccuracy(correctChars: number, totalTypedChars: number): number {
-  if (totalTypedChars <= 0) return 100;
+  if (totalTypedChars <= 0) return 0;
   const acc = (correctChars / totalTypedChars) * 100;
   return Math.min(100, Math.max(0, parseFloat(acc.toFixed(1))));
 }
@@ -92,19 +92,19 @@ export function getPerformanceRating(wpm: number, accuracy: number): {
   description: string;
 } {
   if (wpm >= 120 && accuracy >= 97) {
-    return { tier: 'GODLIKE', badgeColor: 'text-purple-400 border-purple-500/40 bg-purple-500/10', description: 'Top tier competitive speed and precision.' };
+    return { tier: 'GODLIKE', badgeColor: 'text-[#FF6E1A] border-[#FF6E1A]/40 bg-[#FF6E1A]/10', description: 'Top tier competitive speed and precision.' };
   }
   if (wpm >= 90 && accuracy >= 95) {
-    return { tier: 'MASTER', badgeColor: 'text-brand border-brand/40 bg-brand/10', description: 'Exceptional speed and typing rhythm.' };
+    return { tier: 'MASTER', badgeColor: 'text-[#FF5A00] border-[#FF5A00]/40 bg-[#FF5A00]/10', description: 'Exceptional speed and typing rhythm.' };
   }
   if (wpm >= 70 && accuracy >= 92) {
-    return { tier: 'DIAMOND', badgeColor: 'text-cyan-400 border-cyan-500/40 bg-cyan-500/10', description: 'Advanced typist with great flow.' };
+    return { tier: 'DIAMOND', badgeColor: 'text-[#FF6E1A] border-[#FF6E1A]/40 bg-[#FF6E1A]/10', description: 'Advanced typist with great flow.' };
   }
   if (wpm >= 50 && accuracy >= 88) {
-    return { tier: 'GOLD', badgeColor: 'text-emerald-400 border-emerald-500/40 bg-emerald-500/10', description: 'Solid above-average proficiency.' };
+    return { tier: 'GOLD', badgeColor: 'text-[#FFA347] border-[#FFA347]/40 bg-[#FFA347]/10', description: 'Solid above-average proficiency.' };
   }
   if (wpm >= 30) {
-    return { tier: 'SILVER', badgeColor: 'text-blue-400 border-blue-500/40 bg-blue-500/10', description: 'Good foundation with room for speed gains.' };
+    return { tier: 'SILVER', badgeColor: 'text-neutral-300 border-neutral-500/40 bg-neutral-500/10', description: 'Good foundation with room for speed gains.' };
   }
-  return { tier: 'NOVICE', badgeColor: 'text-slate-400 border-slate-500/40 bg-slate-500/10', description: 'Keep practicing to unlock faster speed!' };
+  return { tier: 'NOVICE', badgeColor: 'text-neutral-400 border-neutral-600/40 bg-neutral-600/10', description: 'Keep practicing to unlock faster speed!' };
 }

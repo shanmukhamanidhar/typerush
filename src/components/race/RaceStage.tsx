@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Trophy, Zap, Target, AlertCircle, Clock, Flag } from 'lucide-react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { Flag, WifiOff, Radio } from 'lucide-react';
 import { RaceRoom, TestResult } from '../../types/typing';
 import { useTypingEngine } from '../../hooks/useTypingEngine';
 import { useTimer } from '../../hooks/useTimer';
@@ -9,8 +9,8 @@ import { soundEngine } from '../../utils/audioSynth';
 interface RaceStageProps {
   room: RaceRoom;
   localPlayerId: string;
-  onUpdateProgress: (progress: number, wpm: number, accuracy: number) => void;
-  onFinishRace: (wpm: number, accuracy: number) => void;
+  onUpdateProgress: (progress: number, wpm: number, accuracy: number, second?: number) => void;
+  onFinishRace: (wpm: number, accuracy: number, metricsHistory?: { second: number; wpm: number; accuracy?: number }[]) => void;
 }
 
 export const RaceStage: React.FC<RaceStageProps> = ({
@@ -22,11 +22,9 @@ export const RaceStage: React.FC<RaceStageProps> = ({
   const [countdownNumber, setCountdownNumber] = useState<number | string>(3);
   const [isRacingStarted, setIsRacingStarted] = useState<boolean>(room.status === 'racing');
 
-  const localPlayer = room.players[localPlayerId];
-  const opponentId = Object.keys(room.players).find((id) => id !== localPlayerId);
-  const opponent = opponentId ? room.players[opponentId] : null;
+  const allPlayers = Object.values(room.players);
 
-  // Countdown timer logic
+  // Synchronized countdown logic
   useEffect(() => {
     if (room.status === 'countdown' && room.startTimestamp) {
       const interval = setInterval(() => {
@@ -40,9 +38,9 @@ export const RaceStage: React.FC<RaceStageProps> = ({
           clearInterval(interval);
           setTimeout(() => {
             setIsRacingStarted(true);
-          }, 400);
+          }, 350);
         }
-      }, 250);
+      }, 200);
 
       return () => clearInterval(interval);
     } else if (room.status === 'racing') {
@@ -50,7 +48,7 @@ export const RaceStage: React.FC<RaceStageProps> = ({
     }
   }, [room.status, room.startTimestamp]);
 
-  // Hook typing engine to race passage
+  // Hook typing engine to identical race passage
   const typingEngine = useTypingEngine({
     passage: room.passage,
     mode: room.testMode,
@@ -58,7 +56,7 @@ export const RaceStage: React.FC<RaceStageProps> = ({
     difficulty: room.difficulty,
     category: room.category,
     onFinish: (result: TestResult) => {
-      onFinishRace(result.wpm, result.accuracy);
+      onFinishRace(result.wpm, result.accuracy, result.metricsHistory);
     },
   });
 
@@ -70,108 +68,142 @@ export const RaceStage: React.FC<RaceStageProps> = ({
     },
   });
 
-  // Start timer once racing starts
+  // Start timer once countdown ends
   useEffect(() => {
     if (isRacingStarted && !timer.isActive && !timer.isFinished) {
       timer.startTimer();
     }
   }, [isRacingStarted, timer]);
 
-  // Throttle broadcast progress updates
+  // Throttle broadcast progress updates (every 140ms or on completion)
   const lastBroadcastRef = useRef<number>(0);
   useEffect(() => {
     const now = Date.now();
-    if (now - lastBroadcastRef.current > 150 || typingEngine.progress === 100) {
+    if (now - lastBroadcastRef.current > 140 || typingEngine.progress === 100) {
       lastBroadcastRef.current = now;
-      onUpdateProgress(typingEngine.progress, typingEngine.wpm, typingEngine.accuracy);
+      const elapsed = Math.max(1, timer.elapsedSeconds);
+      onUpdateProgress(typingEngine.progress, typingEngine.wpm, typingEngine.accuracy, elapsed);
     }
-  }, [typingEngine.progress, typingEngine.wpm, typingEngine.accuracy, onUpdateProgress]);
+  }, [typingEngine.progress, typingEngine.wpm, typingEngine.accuracy, timer.elapsedSeconds, room.duration, onUpdateProgress]);
+
+  // Ranked competitors sorted by progress (descending) and then WPM
+  const rankedPlayers = useMemo(() => {
+    return [...allPlayers].sort((a, b) => {
+      if (a.isFinished && b.isFinished) {
+        return (a.rank || 99) - (b.rank || 99);
+      }
+      if (a.isFinished) return -1;
+      if (b.isFinished) return 1;
+
+      const progA = a.id === localPlayerId ? typingEngine.progress : a.progress;
+      const progB = b.id === localPlayerId ? typingEngine.progress : b.progress;
+      if (progA !== progB) return progB - progA;
+
+      const wpmA = a.id === localPlayerId ? typingEngine.wpm : a.wpm;
+      const wpmB = b.id === localPlayerId ? typingEngine.wpm : b.wpm;
+      return wpmB - wpmA;
+    });
+  }, [allPlayers, localPlayerId, typingEngine.progress, typingEngine.wpm]);
 
   return (
-    <div className="w-full max-w-5xl mx-auto py-6 px-4 animate-fadeIn font-mono">
+    <div className="w-full max-w-4xl mx-auto py-8 font-mono select-none animate-fadeIn text-[#111111] dark:text-[#F5F5F5]">
       
-      {/* Synchronized 3-2-1-GO Fullscreen Overlay */}
+      {/* Synchronized 3-2-1-GO Minimal Fullscreen Overlay */}
       {room.status === 'countdown' && !isRacingStarted && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md">
-          <div className="text-center animate-bounce">
-            <span className="text-8xl sm:text-9xl font-black text-cyan-400 drop-shadow-[0_0_40px_rgba(0,240,255,0.6)]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm">
+          <div className="text-center font-mono">
+            <span className="text-8xl sm:text-9xl font-black text-[#FF5A00] block mb-2">
               {countdownNumber}
             </span>
-            <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-4">
-              Get ready to race!
+            <p className="text-xs uppercase tracking-widest text-[#646669] dark:text-[#A1A1A1]">
+              Synchronizing with opponents
             </p>
           </div>
         </div>
       )}
 
-      {/* 1v1 Head-to-Head Visual Track */}
-      <div className="bg-white dark:bg-[#0f172a]/90 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-6 mb-6 shadow-xl">
-        <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100 dark:border-slate-800 text-xs">
-          <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
-            <Flag className="w-4 h-4 text-cyan-500" />
-            <span>LIVE 1V1 RACE TRACK</span>
+      {/* Realtime Competitor Progress Track */}
+      <div className="mb-8 p-5 rounded-xl border border-[#E5E5E5] dark:border-[#222222] bg-black/[0.01] dark:bg-white/[0.01]">
+        <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#E5E5E5] dark:border-[#222222] text-xs">
+          <div className="flex items-center gap-2 font-bold">
+            <Flag className="w-3.5 h-3.5 text-[#FF5A00]" />
+            <span className="uppercase text-[11px] tracking-wider">Live Race Track</span>
+            <span className="text-[10px] text-[#646669]">({allPlayers.length} racers)</span>
           </div>
 
-          <div className="flex items-center gap-4 text-slate-400">
-            <span>Room: {room.code}</span>
-            <span className="text-cyan-400 font-bold">{timer.formattedTime}</span>
+          <div className="flex items-center gap-4 text-xs font-mono">
+            <span className="text-[#646669]">ROOM: <strong className="text-[#FF5A00]">{room.code}</strong></span>
+            <span className="text-[#FF5A00] font-black text-sm">{timer.formattedTime}</span>
           </div>
         </div>
 
-        {/* Local Player Track */}
-        <div className="mb-4">
-          <div className="flex items-center justify-between text-xs mb-1">
-            <span className="font-bold text-cyan-600 dark:text-cyan-400 flex items-center gap-1.5">
-              <span>{localPlayer?.name} (You)</span>
-              {typingEngine.progress >= (opponent?.progress || 0) && (
-                <span className="text-[9px] px-1 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
-                  LEAD
-                </span>
-              )}
-            </span>
-            <span className="text-xs text-slate-400 font-mono">
-              {typingEngine.wpm} WPM · {typingEngine.progress}%
-            </span>
-          </div>
+        {/* Lanes */}
+        <div className="space-y-3">
+          {allPlayers.map((player) => {
+            const isLocal = player.id === localPlayerId;
+            const currentProgress = isLocal ? typingEngine.progress : player.progress;
+            const currentWpm = isLocal ? typingEngine.wpm : player.wpm;
+            const isConnected = player.isConnected !== false;
+            const currentRank = rankedPlayers.findIndex((p) => p.id === player.id) + 1;
 
-          <div className="w-full bg-slate-200 dark:bg-slate-800/80 rounded-full h-3.5 p-0.5 overflow-hidden">
-            <div
-              className="bg-gradient-to-r from-cyan-500 to-blue-500 h-full rounded-full transition-all duration-150 relative flex items-center justify-end pr-1"
-              style={{ width: `${Math.max(4, typingEngine.progress)}%` }}
-            >
-              <div className="w-2 h-2 rounded-full bg-white animate-ping" />
-            </div>
-          </div>
-        </div>
+            return (
+              <div
+                key={player.id}
+                className={`p-3 rounded-lg border transition-colors ${
+                  isLocal
+                    ? 'border-[#FF5A00] bg-[#FF5A00]/5'
+                    : 'border-[#E5E5E5] dark:border-[#222222] bg-black/[0.01] dark:bg-white/[0.01]'
+                }`}
+              >
+                {/* Lane Info */}
+                <div className="flex items-center justify-between text-xs mb-1.5">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
+                      currentRank === 1
+                        ? 'border-[#FF5A00] text-[#FF5A00]'
+                        : 'border-[#E5E5E5] dark:border-[#333333] text-[#646669]'
+                    }`}>
+                      #{currentRank}
+                    </span>
 
-        {/* Opponent Track */}
-        <div>
-          <div className="flex items-center justify-between text-xs mb-1">
-            <span className="font-bold text-purple-600 dark:text-purple-400 flex items-center gap-1.5">
-              <span>{opponent?.name || 'Opponent'}</span>
-              {(opponent?.progress || 0) > typingEngine.progress && (
-                <span className="text-[9px] px-1 rounded bg-purple-500/20 text-purple-400 border border-purple-500/30">
-                  LEAD
-                </span>
-              )}
-            </span>
-            <span className="text-xs text-slate-400 font-mono">
-              {opponent?.wpm || 0} WPM · {opponent?.progress || 0}%
-            </span>
-          </div>
+                    <span className={`font-bold text-xs truncate ${isLocal ? 'text-[#FF5A00]' : 'text-[#111111] dark:text-[#F5F5F5]'}`}>
+                      {player.name} {isLocal && '(You)'}
+                    </span>
 
-          <div className="w-full bg-slate-200 dark:bg-slate-800/80 rounded-full h-3.5 p-0.5 overflow-hidden">
-            <div
-              className="bg-gradient-to-r from-purple-500 to-pink-500 h-full rounded-full transition-all duration-150 relative flex items-center justify-end pr-1"
-              style={{ width: `${Math.max(4, opponent?.progress || 0)}%` }}
-            >
-              <div className="w-2 h-2 rounded-full bg-white animate-ping" />
-            </div>
-          </div>
+                    {player.isFinished && (
+                      <span className="text-[9px] uppercase px-1.5 py-0.2 rounded border border-[#FF5A00]/40 text-[#FF5A00] font-bold">
+                        Finished
+                      </span>
+                    )}
+
+                    {!isConnected && (
+                      <span className="text-[9px] uppercase px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-400 flex items-center gap-1 font-bold">
+                        <WifiOff className="w-2.5 h-2.5" /> DNF
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="text-xs font-mono">
+                    <span className="font-bold text-[#FF5A00]">{currentWpm}</span> WPM · {Math.round(currentProgress)}%
+                  </div>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="w-full bg-[#E5E5E5]/60 dark:bg-[#1A1A1A] rounded-full h-2 overflow-hidden">
+                  <div
+                    className={`h-full transition-all duration-150 rounded-full ${
+                      isLocal ? 'bg-[#FF5A00]' : 'bg-[#646669]/60 dark:bg-[#646669]/40'
+                    }`}
+                    style={{ width: `${Math.max(2, currentProgress)}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* Primary Typing Passage */}
+      {/* Typing Area for the Identical Passage */}
       <TypingArea
         passage={room.passage}
         typedChars={typingEngine.typedChars}
@@ -185,10 +217,6 @@ export const RaceStage: React.FC<RaceStageProps> = ({
         onRestart={() => {}}
       />
 
-      {/* Floating Status Banner */}
-      <div className="mt-4 text-center text-xs text-slate-400">
-        ⚡ 1v1 Realtime Synchronization via Supabase Realtime Channel
-      </div>
     </div>
   );
 };
