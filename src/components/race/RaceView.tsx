@@ -219,7 +219,7 @@ export const RaceView: React.FC<RaceViewProps> = ({
           value={nameInput}
           onChange={(e) => setNameInput(e.target.value)}
           maxLength={18}
-          className="w-full bg-transparent border-b border-[#E5E5E5] dark:border-[#333333] pb-1 text-sm font-bold text-[#111111] dark:text-[#F5F5F5] focus:outline-none focus:border-[#FF5A00] transition-colors"
+          className="w-full bg-transparent border-b border-[#E5E5E5] dark:border-[#333333] pb-1 text-base sm:text-sm font-bold text-[#111111] dark:text-[#F5F5F5] focus:outline-none focus:border-[#FF5A00] transition-colors"
           placeholder="Enter display name"
         />
       </div>
@@ -237,10 +237,10 @@ export const RaceView: React.FC<RaceViewProps> = ({
       )}
 
       {/* Mode Navigation Tabs */}
-      <div className="flex border-b border-[#E5E5E5] dark:border-[#222222] mb-8 text-xs font-bold uppercase tracking-wider">
+      <div className="flex border-b border-[#E5E5E5] dark:border-[#222222] mb-8 text-xs font-bold uppercase tracking-wider overflow-x-auto no-scrollbar">
         <button
           onClick={() => { setActiveTab('quick'); setErrorMsg(null); setInfoMsg(null); }}
-          className={`pb-3 px-4 flex items-center gap-1.5 border-b-2 transition-colors cursor-pointer ${
+          className={`pb-3 px-4 flex items-center gap-1.5 border-b-2 transition-colors cursor-pointer whitespace-nowrap min-h-[44px] ${
             activeTab === 'quick'
               ? 'border-[#FF5A00] text-[#FF5A00]'
               : 'border-transparent text-[#646669] dark:text-[#A1A1A1] hover:text-[#111111] dark:hover:text-[#F5F5F5]'
@@ -252,7 +252,7 @@ export const RaceView: React.FC<RaceViewProps> = ({
 
         <button
           onClick={() => { setActiveTab('create'); setErrorMsg(null); setInfoMsg(null); }}
-          className={`pb-3 px-4 flex items-center gap-1.5 border-b-2 transition-colors cursor-pointer ${
+          className={`pb-3 px-4 flex items-center gap-1.5 border-b-2 transition-colors cursor-pointer whitespace-nowrap min-h-[44px] ${
             activeTab === 'create'
               ? 'border-[#FF5A00] text-[#FF5A00]'
               : 'border-transparent text-[#646669] dark:text-[#A1A1A1] hover:text-[#111111] dark:hover:text-[#F5F5F5]'
@@ -264,7 +264,7 @@ export const RaceView: React.FC<RaceViewProps> = ({
 
         <button
           onClick={() => { setActiveTab('join'); setErrorMsg(null); setInfoMsg(null); }}
-          className={`pb-3 px-4 flex items-center gap-1.5 border-b-2 transition-colors cursor-pointer ${
+          className={`pb-3 px-4 flex items-center gap-1.5 border-b-2 transition-colors cursor-pointer whitespace-nowrap min-h-[44px] ${
             activeTab === 'join'
               ? 'border-[#FF5A00] text-[#FF5A00]'
               : 'border-transparent text-[#646669] dark:text-[#A1A1A1] hover:text-[#111111] dark:hover:text-[#F5F5F5]'
@@ -276,7 +276,7 @@ export const RaceView: React.FC<RaceViewProps> = ({
 
         <button
           onClick={() => { setActiveTab('history'); setErrorMsg(null); setInfoMsg(null); }}
-          className={`pb-3 px-4 flex items-center gap-1.5 border-b-2 transition-colors cursor-pointer ${
+          className={`pb-3 px-4 flex items-center gap-1.5 border-b-2 transition-colors cursor-pointer whitespace-nowrap min-h-[44px] ${
             activeTab === 'history'
               ? 'border-[#FF5A00] text-[#FF5A00]'
               : 'border-transparent text-[#646669] dark:text-[#A1A1A1] hover:text-[#111111] dark:hover:text-[#F5F5F5]'

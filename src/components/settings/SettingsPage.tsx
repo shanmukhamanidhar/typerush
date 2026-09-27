@@ -88,7 +88,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search settings..."
-            className="w-full pl-9 pr-3 py-1.5 rounded-lg border border-[#E5E5E5] dark:border-[#222222] bg-black/[0.02] dark:bg-white/[0.02] text-xs text-[#111111] dark:text-[#F5F5F5] placeholder-[#646669] outline-none focus:border-[#FF5A00] transition-colors"
+            className="w-full pl-9 pr-3 py-1.5 rounded-lg border border-[#E5E5E5] dark:border-[#222222] bg-black/[0.02] dark:bg-white/[0.02] text-base sm:text-xs text-[#111111] dark:text-[#F5F5F5] placeholder-[#646669] outline-none focus:border-[#FF5A00] transition-colors"
           />
         </div>
       </div>

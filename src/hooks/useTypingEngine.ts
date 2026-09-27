@@ -537,149 +537,38 @@ export function useTypingEngine({
   ]);
 
   // Handle keystroke input
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  // Process backspace (used by both hardware keys and mobile virtual keyboards)
+  const handleBackspace = useCallback(() => {
     if (isFinished || isPaused || isFailed) return;
+    if (confidenceMode) return;
 
-    // Detect CapsLock
-    setCapsLockActive(e.getModifierState('CapsLock'));
-
-    const key = e.key;
-
-    // Ignore modifier and navigation keys except Backspace and Enter
-    if (key === 'Tab' || key === 'Alt' || key === 'Control' || key === 'Meta' || key === 'Escape' || key === 'CapsLock' || key === 'Shift') {
-      return;
+    if (typedCharsRef.current.length > 0) {
+      setTypedChars(prev => prev.slice(0, -1));
     }
+  }, [isFinished, isPaused, isFailed, confidenceMode]);
 
-    // Start timer on first valid keystroke
+  // Process single character entry (used by both hardware keys and mobile virtual keyboards)
+  const handleInputChar = useCallback((charToCompare: string) => {
+    if (isFinished || isPaused || isFailed) return;
+    if (charToCompare.length !== 1) return;
+
+    // Start timer on first valid character
     if (!isStarted) {
       setIsStarted(true);
       startTimeRef.current = Date.now();
     }
 
-    // Virtual keyboard key visual trigger
-    setActiveKey(key);
+    // Sound and visual reaction
+    soundEngine.playKeyPress(charToCompare === ' ');
+    setActiveKey(charToCompare);
     setTimeout(() => setActiveKey(null), 140);
 
-    // CONFIDENCE MODE: Block Backspace completely
-    if (key === 'Backspace') {
-      e.preventDefault();
-      if (confidenceMode) {
-        return;
-      }
+    const currPassage = passageRef.current;
+    const currTyped = typedCharsRef.current;
 
-      if (typedChars.length > 0) {
-        setTypedChars(prev => prev.slice(0, -1));
-      }
-      return;
-    }
-
-    // Enter in code mode translates to newline \n
-    const charToCompare = key === 'Enter' ? '\n' : key;
-
-    // Only process single characters or Enter newline
-    if (charToCompare.length === 1) {
-      e.preventDefault();
-      soundEngine.playKeyPress(charToCompare === ' ');
-
-      if (typedChars.length >= passage.length) {
-        if (mode === 'zen' || mode === 'time') {
-          // In Zen or Time Mode, seamlessly append more generated words!
-          const nextSegment = ' ' + generateConfiguredPassage({
-            language: dictLanguage,
-            wordSetSize: wordSet,
-            wordCount: 25,
-            punctuation,
-            numbers
-          });
-          setPassage(prev => prev + nextSegment);
-        } else {
-          completeTest();
-          return;
-        }
-      }
-
-      const nextTargetChar = passage[typedChars.length];
-      const isCorrect = charToCompare === nextTargetChar;
-
-      // STOP ON ERROR: LETTER
-      // If stopOnError === 'letter', do not advance until correct letter is typed
-      if (stopOnError === 'letter' && !isCorrect) {
-        setIsKeyError(true);
-        setTimeout(() => setIsKeyError(false), 200);
-        setTotalErrors(err => err + 1);
-        setStreak(0);
-        return;
-      }
-
-      // STOP ON ERROR: WORD
-      // If user presses Space to proceed to next word, check if current word has errors
-      if (stopOnError === 'word' && charToCompare === ' ') {
-        const lastSpaceIndex = typedChars.lastIndexOf(' ');
-        const currentWordStart = lastSpaceIndex === -1 ? 0 : lastSpaceIndex + 1;
-        const currentTypedWord = typedChars.slice(currentWordStart);
-        const currentTargetWord = passage.slice(currentWordStart, typedChars.length);
-        if (currentTypedWord !== currentTargetWord) {
-          setIsKeyError(true);
-          setTimeout(() => setIsKeyError(false), 200);
-          return;
-        }
-      }
-
-      // STRICT SPACE: Cannot space past incomplete word
-      if (strictSpace && charToCompare === ' ' && nextTargetChar !== ' ') {
-        return;
-      }
-
-      // DIFFICULTY RULE: MASTER (Any single miskey fails immediately!)
-      if (difficultyRule === 'master' && !isCorrect) {
-        failTest('Master Mode: Single miskey detected');
-        return;
-      }
-
-      // DIFFICULTY RULE: EXPERT (Submitting a mistyped word via space fails immediately)
-      if (difficultyRule === 'expert' && charToCompare === ' ') {
-        const lastSpaceIndex = typedChars.lastIndexOf(' ');
-        const currentWordStart = lastSpaceIndex === -1 ? 0 : lastSpaceIndex + 1;
-        const currentTypedWord = typedChars.slice(currentWordStart);
-        const currentTargetWord = passage.slice(currentWordStart, typedChars.length);
-        if (currentTypedWord !== currentTargetWord) {
-          failTest('Expert Mode: Submitted mistyped word');
-          return;
-        }
-      }
-
-      // Heatmap tracking
-      const targetLower = nextTargetChar ? nextTargetChar.toLowerCase() : ' ';
-      if (!heatmapRef.current[targetLower]) {
-        heatmapRef.current[targetLower] = { key: targetLower, typed: 0, correct: 0, errors: 0, mistakesTo: {} };
-      }
-      heatmapRef.current[targetLower].typed++;
-
-      if (isCorrect) {
-        heatmapRef.current[targetLower].correct++;
-        setIsKeyError(false);
-        setStreak(prev => {
-          const next = prev + 1;
-          setMaxStreak(m => Math.max(m, next));
-          return next;
-        });
-      } else {
-        heatmapRef.current[targetLower].errors++;
-        const pressedLower = charToCompare.toLowerCase();
-        heatmapRef.current[targetLower].mistakesTo[pressedLower] = (heatmapRef.current[targetLower].mistakesTo[pressedLower] || 0) + 1;
-
-        soundEngine.playError();
-        setIsKeyError(true);
-        setTimeout(() => setIsKeyError(false), 200);
-        setTotalErrors(err => err + 1);
-        setStreak(0);
-      }
-
-      const nextTyped = typedChars + charToCompare;
-      setTypedChars(nextTyped);
-
-      // In Zen or Time mode, dynamically append next chunk when approaching the end of buffer
-      if ((mode === 'zen' || mode === 'time') && passage.length - nextTyped.length < 35) {
+    // Buffer wrap / append
+    if (currTyped.length >= currPassage.length) {
+      if (modeRef.current === 'zen' || modeRef.current === 'time') {
         const nextSegment = ' ' + generateConfiguredPassage({
           language: dictLanguage,
           wordSetSize: wordSet,
@@ -688,22 +577,115 @@ export function useTypingEngine({
           numbers
         });
         setPassage(prev => prev + nextSegment);
+      } else {
+        completeTestRef.current();
+        return;
       }
+    }
 
-      // Check for Word Mode completion
-      if (mode === 'words') {
-        const wordsNow = nextTyped.trim().split(/\s+/).filter(Boolean).length;
-        if (wordsNow >= wordCount) {
-          setTimeout(() => completeTest(), 40);
-          return;
-        }
+    const nextTargetChar = currPassage[currTyped.length];
+    const isCorrect = charToCompare === nextTargetChar;
+
+    // STOP ON ERROR: LETTER
+    if (stopOnError === 'letter' && !isCorrect) {
+      setIsKeyError(true);
+      setTimeout(() => setIsKeyError(false), 200);
+      setTotalErrors(err => err + 1);
+      setStreak(0);
+      return;
+    }
+
+    // STOP ON ERROR: WORD
+    if (stopOnError === 'word' && charToCompare === ' ') {
+      const lastSpaceIndex = currTyped.lastIndexOf(' ');
+      const currentWordStart = lastSpaceIndex === -1 ? 0 : lastSpaceIndex + 1;
+      const currentTypedWord = currTyped.slice(currentWordStart);
+      const currentTargetWord = currPassage.slice(currentWordStart, currTyped.length);
+      if (currentTypedWord !== currentTargetWord) {
+        setIsKeyError(true);
+        setTimeout(() => setIsKeyError(false), 200);
+        return;
       }
+    }
 
-      // Check for passage end (Quick End finishes on last character for custom/quote/code/preset modes)
-      if (nextTyped.length === passage.length) {
-        if (mode !== 'zen' && mode !== 'time') {
-          setTimeout(() => completeTest(), 40);
-        }
+    // STRICT SPACE
+    if (strictSpace && charToCompare === ' ' && nextTargetChar !== ' ') {
+      return;
+    }
+
+    // DIFFICULTY RULE: MASTER
+    if (difficultyRule === 'master' && !isCorrect) {
+      failTestRef.current('Master Mode: Single miskey detected');
+      return;
+    }
+
+    // DIFFICULTY RULE: EXPERT
+    if (difficultyRule === 'expert' && charToCompare === ' ') {
+      const lastSpaceIndex = currTyped.lastIndexOf(' ');
+      const currentWordStart = lastSpaceIndex === -1 ? 0 : lastSpaceIndex + 1;
+      const currentTypedWord = currTyped.slice(currentWordStart);
+      const currentTargetWord = currPassage.slice(currentWordStart, currTyped.length);
+      if (currentTypedWord !== currentTargetWord) {
+        failTestRef.current('Expert Mode: Submitted mistyped word');
+        return;
+      }
+    }
+
+    // Heatmap tracking
+    const targetLower = nextTargetChar ? nextTargetChar.toLowerCase() : ' ';
+    if (!heatmapRef.current[targetLower]) {
+      heatmapRef.current[targetLower] = { key: targetLower, typed: 0, correct: 0, errors: 0, mistakesTo: {} };
+    }
+    heatmapRef.current[targetLower].typed++;
+
+    if (isCorrect) {
+      heatmapRef.current[targetLower].correct++;
+      setIsKeyError(false);
+      setStreak(prev => {
+        const next = prev + 1;
+        setMaxStreak(m => Math.max(m, next));
+        return next;
+      });
+    } else {
+      heatmapRef.current[targetLower].errors++;
+      const pressedLower = charToCompare.toLowerCase();
+      heatmapRef.current[targetLower].mistakesTo[pressedLower] = (heatmapRef.current[targetLower].mistakesTo[pressedLower] || 0) + 1;
+
+      soundEngine.playError();
+      setIsKeyError(true);
+      setTimeout(() => setIsKeyError(false), 200);
+      setTotalErrors(err => err + 1);
+      setStreak(0);
+    }
+
+    const nextTyped = currTyped + charToCompare;
+    setTypedChars(nextTyped);
+
+    // In Zen or Time mode, append next segment when nearing end
+    if ((modeRef.current === 'zen' || modeRef.current === 'time') && currPassage.length - nextTyped.length < 35) {
+      const nextSegment = ' ' + generateConfiguredPassage({
+        language: dictLanguage,
+        wordSetSize: wordSet,
+        wordCount: 25,
+        punctuation,
+        numbers
+      });
+      setPassage(prev => prev + nextSegment);
+    }
+
+    // Word mode completion check
+    if (modeRef.current === 'words') {
+      const wordsNow = nextTyped.trim().split(/\s+/).filter(Boolean).length;
+      if (wordsNow >= (wordCount || 25)) {
+        setTimeout(() => completeTestRef.current(), 40);
+        return;
+      }
+    }
+
+    // End of passage check
+    if (nextTyped.length === currPassage.length) {
+      if (modeRef.current !== 'zen' && modeRef.current !== 'time') {
+        setTimeout(() => completeTestRef.current(), 40);
       }
     }
   }, [
@@ -711,21 +693,84 @@ export function useTypingEngine({
     isPaused,
     isFailed,
     isStarted,
-    typedChars,
-    passage,
-    completeTest,
-    failTest,
-    mode,
-    wordCount,
-    confidenceMode,
     stopOnError,
     strictSpace,
     difficultyRule,
     dictLanguage,
     wordSet,
     punctuation,
-    numbers
+    numbers,
+    wordCount
   ]);
+
+  // Handle hardware keyboard keystroke
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (isFinished || isPaused || isFailed) return;
+
+    // Detect CapsLock
+    setCapsLockActive(e.getModifierState('CapsLock'));
+
+    const key = e.key;
+
+    // Ignore modifier and navigation keys
+    if (key === 'Tab' || key === 'Alt' || key === 'Control' || key === 'Meta' || key === 'Escape' || key === 'CapsLock' || key === 'Shift') {
+      return;
+    }
+
+    // Virtual keyboard on Android emits 'Unidentified' or keyCode 229: let handleInputEvent process it!
+    if (key === 'Unidentified' || e.keyCode === 229) {
+      return;
+    }
+
+    // Backspace
+    if (key === 'Backspace') {
+      e.preventDefault();
+      handleBackspace();
+      return;
+    }
+
+    // Enter in code mode translates to newline \n
+    const charToCompare = key === 'Enter' ? '\n' : key;
+
+    // Process single characters
+    if (charToCompare.length === 1) {
+      e.preventDefault();
+      handleInputChar(charToCompare);
+    }
+  }, [isFinished, isPaused, isFailed, handleBackspace, handleInputChar]);
+
+  // Handle mobile virtual keyboard input event (Android Gboard, iOS QuickType, composition)
+  const handleInputEvent = useCallback((e: React.FormEvent<HTMLInputElement>) => {
+    if (isFinished || isPaused || isFailed) return;
+    const native = (e.nativeEvent as any) || {};
+    const inputType = native.inputType;
+    const data = native.data;
+
+    // Virtual keyboard Backspace
+    if (inputType === 'deleteContentBackward' || inputType === 'deleteWordBackward') {
+      handleBackspace();
+      if (e.currentTarget) e.currentTarget.value = '';
+      return;
+    }
+
+    // Virtual keyboard character input
+    if (data && data.length > 0) {
+      for (let i = 0; i < data.length; i++) {
+        handleInputChar(data[i]);
+      }
+      if (e.currentTarget) e.currentTarget.value = '';
+      return;
+    }
+
+    // Fallback reading current value
+    const val = e.currentTarget.value;
+    if (val && val.length > 0) {
+      for (let i = 0; i < val.length; i++) {
+        handleInputChar(val[i]);
+      }
+      e.currentTarget.value = '';
+    }
+  }, [isFinished, isPaused, isFailed, handleBackspace, handleInputChar]);
 
   // Anti-cheat: prevent paste
   const handlePaste = useCallback((e: React.ClipboardEvent) => {
@@ -763,6 +808,9 @@ export function useTypingEngine({
     metricsHistory: metricsHistoryRef.current,
     heatmap: heatmapRef.current,
     handleKeyDown,
+    handleInputEvent,
+    handleInputChar,
+    handleBackspace,
     handlePaste,
     togglePause,
     completeTest,

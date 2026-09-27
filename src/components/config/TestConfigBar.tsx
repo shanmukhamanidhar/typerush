@@ -47,17 +47,17 @@ export const TestConfigBar: React.FC<TestConfigBarProps> = ({
   ];
 
   return (
-    <div className={`transition-opacity duration-200 select-none ${isStarted ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 px-3.5 py-1.5 rounded-lg bg-black/[0.04] dark:bg-white/[0.03] text-xs font-mono text-[#646669] dark:text-[#646669] border border-black/[0.04] dark:border-white/[0.04]">
+    <div className={`w-full max-w-full overflow-x-auto no-scrollbar py-1 transition-opacity duration-200 select-none ${isStarted ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+      <div className="flex items-center justify-start sm:justify-center min-w-max sm:min-w-0 sm:flex-wrap gap-x-2 sm:gap-x-3 gap-y-1.5 px-3 py-1.5 rounded-lg bg-black/[0.04] dark:bg-white/[0.03] text-xs font-mono text-[#646669] dark:text-[#646669] border border-black/[0.04] dark:border-white/[0.04]">
         
         {/* Left Section: Modifiers (Punctuation & Numbers) */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <button
             onClick={(e) => {
               e.stopPropagation();
               onTogglePunctuation();
             }}
-            className={`flex items-center gap-1 transition-colors cursor-pointer px-1.5 py-0.5 rounded ${
+            className={`flex items-center gap-1 transition-colors cursor-pointer px-2 py-1 rounded active:bg-black/5 dark:active:bg-white/5 ${
               punctuation
                 ? 'text-[#FF5A00] font-bold'
                 : 'hover:text-[#111111] dark:hover:text-[#F5F5F5]'
@@ -73,7 +73,7 @@ export const TestConfigBar: React.FC<TestConfigBarProps> = ({
               e.stopPropagation();
               onToggleNumbers();
             }}
-            className={`flex items-center gap-1 transition-colors cursor-pointer px-1.5 py-0.5 rounded ${
+            className={`flex items-center gap-1 transition-colors cursor-pointer px-2 py-1 rounded active:bg-black/5 dark:active:bg-white/5 ${
               numbers
                 ? 'text-[#FF5A00] font-bold'
                 : 'hover:text-[#111111] dark:hover:text-[#F5F5F5]'

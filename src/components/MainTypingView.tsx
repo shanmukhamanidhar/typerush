@@ -36,6 +36,7 @@ interface MainTypingViewProps {
   onSelectDifficulty?: (difficulty: Difficulty) => void;
   onSelectCategory?: (category: Category) => void;
   onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onInput?: (e: React.FormEvent<HTMLInputElement>) => void;
   onPaste: (e: React.ClipboardEvent) => void;
   onRestart: () => void;
   quoteAuthor?: string;
@@ -69,6 +70,7 @@ export const MainTypingView: React.FC<MainTypingViewProps> = ({
   onToggleNumbers,
   onOpenLanguageModal,
   onKeyDown,
+  onInput,
   onPaste,
   onRestart,
   quoteAuthor,
@@ -164,10 +166,10 @@ export const MainTypingView: React.FC<MainTypingViewProps> = ({
   }, [settings?.fontFamily]);
 
   const fontSizeClass = useMemo(() => {
-    if (settings?.fontSize === 'sm') return 'text-xl sm:text-2xl leading-[1.7]';
-    if (settings?.fontSize === 'lg') return 'text-3xl sm:text-4xl leading-[2.1]';
-    if (settings?.fontSize === 'xl') return 'text-4xl sm:text-5xl leading-[2.3]';
-    return 'text-2xl sm:text-3xl lg:text-3xl leading-[1.8] sm:leading-[2.0]';
+    if (settings?.fontSize === 'sm') return 'text-lg sm:text-xl md:text-2xl leading-[1.6] sm:leading-[1.7]';
+    if (settings?.fontSize === 'lg') return 'text-2xl sm:text-3xl md:text-4xl leading-[1.8] sm:leading-[2.1]';
+    if (settings?.fontSize === 'xl') return 'text-3xl sm:text-4xl md:text-5xl leading-[2.0] sm:leading-[2.3]';
+    return 'text-xl sm:text-2xl md:text-3xl leading-[1.7] sm:leading-[2.0]';
   }, [settings?.fontSize]);
 
   // Caret Settings
@@ -212,14 +214,15 @@ export const MainTypingView: React.FC<MainTypingViewProps> = ({
   return (
     <div 
       onClick={handleFocusInput}
-      className="w-full max-w-5xl mx-auto flex flex-col justify-between items-center py-6 sm:py-10 select-none font-mono cursor-text min-h-[70vh] animate-fadeIn"
+      className="relative w-full max-w-5xl mx-auto flex flex-col justify-between items-center py-4 sm:py-8 select-none font-mono cursor-text min-h-[60vh] sm:min-h-[70vh] animate-fadeIn"
     >
-      {/* Hidden real input capturing user keystrokes */}
+      {/* Hidden real input capturing user keystrokes with 16px font size to prevent mobile zoom */}
       <input
         ref={inputRef}
         type="text"
-        value=""
+        defaultValue=""
         onChange={() => {}}
+        onInput={onInput}
         onKeyDown={onKeyDown}
         onPaste={onPaste}
         onFocus={() => setIsFocused(true)}
@@ -230,40 +233,47 @@ export const MainTypingView: React.FC<MainTypingViewProps> = ({
         autoCorrect="off"
         autoCapitalize="off"
         spellCheck="false"
-        className="absolute inset-0 opacity-0 cursor-default pointer-events-none -z-20 w-0 h-0"
+        inputMode="text"
+        style={{ fontSize: '16px' }}
+        className="absolute inset-0 opacity-0 cursor-text z-0 w-full h-full pointer-events-auto"
         aria-label="Typing input"
       />
 
       {/* TOP: Lightweight Horizontal Monkeytype-style Config Toolbar */}
       {!settings?.hideElements?.testConfig && (
-        <TestConfigBar
-          mode={mode}
-          duration={duration}
-          wordCount={wordCount}
-          quoteLength={quoteLength}
-          punctuation={punctuation}
-          numbers={numbers}
-          languageName={languageName}
-          onSelectMode={(m) => onSelectMode && onSelectMode(m)}
-          onSelectDuration={onSelectDuration}
-          onSelectWordCount={(w) => onSelectWordCount && onSelectWordCount(w)}
-          onSelectQuoteLength={(q) => onSelectQuoteLength && onSelectQuoteLength(q)}
-          onTogglePunctuation={() => onTogglePunctuation && onTogglePunctuation()}
-          onToggleNumbers={() => onToggleNumbers && onToggleNumbers()}
-          onOpenLanguageModal={() => onOpenLanguageModal && onOpenLanguageModal()}
-          isStarted={isStarted}
-        />
+        <div className="relative z-10 w-full flex justify-center">
+          <TestConfigBar
+            mode={mode}
+            duration={duration}
+            wordCount={wordCount}
+            quoteLength={quoteLength}
+            punctuation={punctuation}
+            numbers={numbers}
+            languageName={languageName}
+            onSelectMode={(m) => onSelectMode && onSelectMode(m)}
+            onSelectDuration={onSelectDuration}
+            onSelectWordCount={(w) => onSelectWordCount && onSelectWordCount(w)}
+            onSelectQuoteLength={(q) => onSelectQuoteLength && onSelectQuoteLength(q)}
+            onTogglePunctuation={() => onTogglePunctuation && onTogglePunctuation()}
+            onToggleNumbers={() => onToggleNumbers && onToggleNumbers()}
+            onOpenLanguageModal={() => onOpenLanguageModal && onOpenLanguageModal()}
+            isStarted={isStarted}
+          />
+        </div>
       )}
 
       {/* CENTER WORKSPACE: Minimal language indicator, Live Counter & Large Open Typing Text */}
-      <div className="w-full flex flex-col justify-center my-auto py-8">
+      <div className="relative z-0 w-full flex flex-col justify-center my-auto py-4 sm:py-8 pointer-events-none">
         
         {/* Subtle Indicator & Live Metric Row above text */}
-        <div className="flex items-center justify-between mb-2 px-2 text-xs text-[#646669] dark:text-[#646669] h-7">
+        <div className="flex flex-wrap items-center justify-between gap-y-1 mb-2 px-2 text-xs text-[#646669] dark:text-[#646669] min-h-7 pointer-events-auto">
           
           {/* Language / Mode indicator */}
           <div 
-            onClick={() => onOpenLanguageModal && onOpenLanguageModal()}
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenLanguageModal && onOpenLanguageModal();
+            }}
             className="flex items-center gap-1.5 opacity-70 cursor-pointer hover:opacity-100 hover:text-[#FF5A00] transition-colors"
           >
             <Globe className="w-3.5 h-3.5" />
@@ -271,7 +281,7 @@ export const MainTypingView: React.FC<MainTypingViewProps> = ({
           </div>
 
           {/* Live Performance & Progress indicators (WPM, Accuracy, Left & Completed) */}
-          <div className="flex items-center gap-4 text-xs font-mono">
+          <div className="flex items-center gap-3 sm:gap-4 text-xs font-mono ml-auto">
             {isStarted ? (
               <>
                 {!settings?.hideElements?.wpm && (
@@ -360,7 +370,13 @@ export const MainTypingView: React.FC<MainTypingViewProps> = ({
           
           {/* Out-of-focus message */}
           {!isFocused && !isFinished && (
-            <div className="absolute inset-0 bg-[#F7F6F2]/80 dark:bg-[#000000]/80 backdrop-blur-[1px] z-10 flex items-center justify-center">
+            <div 
+              onClick={(e) => {
+                e.stopPropagation();
+                handleFocusInput();
+              }}
+              className="absolute inset-0 bg-[#F7F6F2]/80 dark:bg-[#000000]/80 backdrop-blur-[1px] z-10 flex items-center justify-center cursor-pointer pointer-events-auto"
+            >
               <span className="text-xs text-[#FF5A00] tracking-widest uppercase font-semibold">
                 Click or press any key to focus
               </span>
@@ -470,15 +486,15 @@ export const MainTypingView: React.FC<MainTypingViewProps> = ({
 
       {/* BOTTOM: Minimal Restart Icon & Keyboard Instructions */}
       {!settings?.hideElements?.footer && (
-        <div className="flex flex-col items-center justify-center gap-3 pt-4">
-          {/* Restart Button */}
+        <div className="relative z-10 flex flex-col items-center justify-center gap-2 sm:gap-3 pt-4 pointer-events-auto">
+          {/* Restart Button with min 44x44px touch target */}
           <button
             onClick={(e) => {
               e.stopPropagation();
               onRestart();
               handleFocusInput();
             }}
-            className="p-2 text-[#646669] dark:text-[#646669] hover:text-[#FF5A00] dark:hover:text-[#FF5A00] transition-colors cursor-pointer rounded-full hover:bg-black/5 dark:hover:bg-white/5"
+            className="min-w-[44px] min-h-[44px] p-2.5 text-[#646669] dark:text-[#646669] hover:text-[#FF5A00] dark:hover:text-[#FF5A00] transition-colors cursor-pointer rounded-full hover:bg-black/5 dark:hover:bg-white/5 flex items-center justify-center"
             title="Restart Test (Tab + Enter)"
             aria-label="Restart Test"
           >
@@ -486,7 +502,7 @@ export const MainTypingView: React.FC<MainTypingViewProps> = ({
           </button>
 
           {/* Minimal Muted Shortcuts */}
-          <div className="text-[11px] text-[#646669]/70 dark:text-[#646669]/70 flex items-center gap-2">
+          <div className="text-[11px] text-[#646669]/70 dark:text-[#646669]/70 flex items-center gap-2 flex-wrap justify-center text-center">
             <span><kbd className="px-1.5 py-0.5 rounded bg-black/5 dark:bg-white/5 border border-[#D8D6D1] dark:border-[#242424] text-[10px]">tab</kbd> + <kbd className="px-1.5 py-0.5 rounded bg-black/5 dark:bg-white/5 border border-[#D8D6D1] dark:border-[#242424] text-[10px]">enter</kbd> — restart</span>
             <span>·</span>
             <span><kbd className="px-1.5 py-0.5 rounded bg-black/5 dark:bg-white/5 border border-[#D8D6D1] dark:border-[#242424] text-[10px]">esc</kbd> — pause</span>

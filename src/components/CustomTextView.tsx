@@ -55,7 +55,7 @@ export const CustomTextView: React.FC<CustomTextViewProps> = ({
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="paste or type your custom text here..."
-          className="w-full p-4 rounded bg-transparent border border-[#D8D6D1] dark:border-[#242424] focus:border-[#FF5A00] text-[#111111] dark:text-[#F5F5F5] text-sm font-mono leading-relaxed outline-none resize-none transition-colors placeholder:text-[#646669]"
+          className="w-full p-4 rounded bg-transparent border border-[#D8D6D1] dark:border-[#242424] focus:border-[#FF5A00] text-[#111111] dark:text-[#F5F5F5] text-base sm:text-sm font-mono leading-relaxed outline-none resize-none transition-colors placeholder:text-[#646669]"
         />
 
         <div className="flex items-center justify-between text-xs text-[#646669] dark:text-[#646669]">
@@ -70,7 +70,7 @@ export const CustomTextView: React.FC<CustomTextViewProps> = ({
               <button
                 key={idx}
                 onClick={() => setText(sample.text)}
-                className="px-3 py-1.5 rounded border border-[#D8D6D1] dark:border-[#242424] hover:border-[#FF5A00] text-xs text-[#646669] hover:text-[#111111] dark:hover:text-[#F5F5F5] transition-colors cursor-pointer"
+                className="min-h-[36px] px-3 py-1.5 rounded border border-[#D8D6D1] dark:border-[#242424] hover:border-[#FF5A00] text-xs text-[#646669] hover:text-[#111111] dark:hover:text-[#F5F5F5] transition-colors cursor-pointer"
               >
                 {sample.title}
               </button>
@@ -84,7 +84,7 @@ export const CustomTextView: React.FC<CustomTextViewProps> = ({
         <button
           onClick={handleStart}
           disabled={!text.trim()}
-          className="px-6 py-2 rounded bg-[#FF5A00] disabled:opacity-30 disabled:cursor-not-allowed text-black font-bold text-xs uppercase tracking-wider hover:bg-[#FF6E1A] transition-all cursor-pointer"
+          className="min-h-[44px] px-6 py-2.5 rounded-lg bg-[#FF5A00] disabled:opacity-30 disabled:cursor-not-allowed text-black font-bold text-xs uppercase tracking-wider hover:bg-[#FF6E1A] transition-all cursor-pointer flex items-center justify-center"
         >
           start custom test
         </button>

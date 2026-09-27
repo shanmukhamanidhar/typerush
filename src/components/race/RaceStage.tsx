@@ -213,6 +213,7 @@ export const RaceStage: React.FC<RaceStageProps> = ({
         isFinished={typingEngine.isFinished}
         pasteAttempted={typingEngine.pasteAttempted}
         onKeyDown={typingEngine.handleKeyDown}
+        onInput={typingEngine.handleInputEvent}
         onPaste={typingEngine.handlePaste}
         onRestart={() => {}}
       />

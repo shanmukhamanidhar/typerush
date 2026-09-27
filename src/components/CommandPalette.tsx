@@ -461,11 +461,11 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 bg-black/80 backdrop-blur-md animate-fadeIn font-mono"
+      className="fixed inset-0 z-50 flex items-start justify-center pt-8 sm:pt-20 px-3 sm:px-4 bg-black/80 backdrop-blur-md animate-fadeIn font-mono"
       onClick={onClose}
     >
       <div 
-        className="w-full max-w-2xl bg-white dark:bg-[#111111] border border-[#D8D6D1] dark:border-[#242424] rounded shadow-2xl overflow-hidden flex flex-col max-h-[75vh]"
+        className="w-full max-w-2xl bg-white dark:bg-[#111111] border border-[#D8D6D1] dark:border-[#242424] rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] sm:max-h-[75vh]"
         onClick={e => e.stopPropagation()}
       >
         {/* Search Input Bar */}
@@ -481,11 +481,11 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
             }}
             onKeyDown={handleKeyDown}
             placeholder="Type a command, mode, theme, or language... (e.g. 'zen', 'theme', 'words')"
-            className="w-full bg-transparent text-sm text-[#111111] dark:text-white placeholder-[#888888] dark:placeholder-[#71717A] focus:outline-none"
+            className="w-full bg-transparent text-base sm:text-sm text-[#111111] dark:text-white placeholder-[#888888] dark:placeholder-[#71717A] focus:outline-none"
           />
           <button 
             onClick={onClose}
-            className="p-1 rounded text-[#666666] dark:text-[#A1A1AA] hover:text-[#111111] dark:hover:text-white hover:bg-[#D8D6D1] dark:hover:bg-[#1A1A1A]"
+            className="min-w-[40px] min-h-[40px] p-2 flex items-center justify-center rounded text-[#666666] dark:text-[#A1A1AA] hover:text-[#111111] dark:hover:text-white hover:bg-[#D8D6D1] dark:hover:bg-[#1A1A1A] cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -505,7 +505,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                   key={cmd.id}
                   onClick={() => cmd.handler()}
                   onMouseEnter={() => setSelectedIndex(idx)}
-                  className={`flex items-center justify-between px-3 py-2.5 rounded cursor-pointer text-xs transition-colors ${
+                  className={`min-h-[44px] flex items-center justify-between px-3 py-2.5 rounded cursor-pointer text-xs transition-colors ${
                     isSelected 
                       ? 'bg-[#FF5A00] text-black font-bold shadow-[0_0_12px_rgba(255,90,0,0.25)]' 
                       : 'text-[#666666] dark:text-[#A1A1AA] hover:bg-[#F7F7F7] dark:hover:bg-[#1A1A1A] hover:text-[#111111] dark:hover:text-white'

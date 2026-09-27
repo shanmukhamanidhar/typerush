@@ -203,7 +203,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 rounded border border-[#E5E5E5] dark:border-[#222222] bg-black/[0.02] dark:bg-white/[0.02] text-xs font-mono focus:outline-none focus:border-[#FF5A00]"
+                  className="w-full px-3 py-2.5 rounded border border-[#E5E5E5] dark:border-[#222222] bg-black/[0.02] dark:bg-white/[0.02] text-base sm:text-xs font-mono focus:outline-none focus:border-[#FF5A00]"
                   placeholder="racer@domain.com"
                 />
               </div>
@@ -216,7 +216,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <button
                     type="button"
                     onClick={() => { setActiveTab('reset'); setErrorMsg(null); }}
-                    className="text-[10px] text-[#646669] hover:text-[#FF5A00] transition-colors cursor-pointer"
+                    className="text-[10px] text-[#646669] hover:text-[#FF5A00] transition-colors cursor-pointer py-1"
                   >
                     Forgot password?
                   </button>
@@ -226,7 +226,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3 py-2 rounded border border-[#E5E5E5] dark:border-[#222222] bg-black/[0.02] dark:bg-white/[0.02] text-xs font-mono focus:outline-none focus:border-[#FF5A00]"
+                  className="w-full px-3 py-2.5 rounded border border-[#E5E5E5] dark:border-[#222222] bg-black/[0.02] dark:bg-white/[0.02] text-base sm:text-xs font-mono focus:outline-none focus:border-[#FF5A00]"
                   placeholder="••••••••"
                 />
               </div>
@@ -234,7 +234,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-2.5 rounded bg-[#FF5A00] text-black font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-2"
+                className="w-full min-h-[44px] py-2.5 rounded bg-[#FF5A00] text-black font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-2"
               >
                 <span>{isLoading ? 'Signing In...' : 'Sign In'}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -255,7 +255,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   value={username}
                   onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
                   maxLength={20}
-                  className="w-full px-3 py-2 rounded border border-[#E5E5E5] dark:border-[#222222] bg-black/[0.02] dark:bg-white/[0.02] text-xs font-mono focus:outline-none focus:border-[#FF5A00]"
+                  className="w-full px-3 py-2.5 rounded border border-[#E5E5E5] dark:border-[#222222] bg-black/[0.02] dark:bg-white/[0.02] text-base sm:text-xs font-mono focus:outline-none focus:border-[#FF5A00]"
                   placeholder="e.g. velocity_racer"
                 />
                 <span className="text-[10px] text-[#646669] block mt-0.5">Letters, numbers, underscores only</span>
@@ -270,7 +270,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 rounded border border-[#E5E5E5] dark:border-[#222222] bg-black/[0.02] dark:bg-white/[0.02] text-xs font-mono focus:outline-none focus:border-[#FF5A00]"
+                  className="w-full px-3 py-2.5 rounded border border-[#E5E5E5] dark:border-[#222222] bg-black/[0.02] dark:bg-white/[0.02] text-base sm:text-xs font-mono focus:outline-none focus:border-[#FF5A00]"
                   placeholder="racer@domain.com"
                 />
               </div>
@@ -285,7 +285,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   minLength={6}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3 py-2 rounded border border-[#E5E5E5] dark:border-[#222222] bg-black/[0.02] dark:bg-white/[0.02] text-xs font-mono focus:outline-none focus:border-[#FF5A00]"
+                  className="w-full px-3 py-2.5 rounded border border-[#E5E5E5] dark:border-[#222222] bg-black/[0.02] dark:bg-white/[0.02] text-base sm:text-xs font-mono focus:outline-none focus:border-[#FF5A00]"
                   placeholder="At least 6 characters"
                 />
               </div>
@@ -299,7 +299,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   maxLength={30}
-                  className="w-full px-3 py-2 rounded border border-[#E5E5E5] dark:border-[#222222] bg-black/[0.02] dark:bg-white/[0.02] text-xs font-mono focus:outline-none focus:border-[#FF5A00]"
+                  className="w-full px-3 py-2.5 rounded border border-[#E5E5E5] dark:border-[#222222] bg-black/[0.02] dark:bg-white/[0.02] text-base sm:text-xs font-mono focus:outline-none focus:border-[#FF5A00]"
                   placeholder="Display name on leaderboard"
                 />
               </div>
@@ -307,7 +307,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-2.5 rounded bg-[#FF5A00] text-black font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-2"
+                className="w-full min-h-[44px] py-2.5 rounded bg-[#FF5A00] text-black font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-2"
               >
                 <span>{isLoading ? 'Creating Account...' : 'Create Account'}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -331,7 +331,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 rounded border border-[#E5E5E5] dark:border-[#222222] bg-black/[0.02] dark:bg-white/[0.02] text-xs font-mono focus:outline-none focus:border-[#FF5A00]"
+                  className="w-full px-3 py-2.5 rounded border border-[#E5E5E5] dark:border-[#222222] bg-black/[0.02] dark:bg-white/[0.02] text-base sm:text-xs font-mono focus:outline-none focus:border-[#FF5A00]"
                   placeholder="racer@domain.com"
                 />
               </div>
@@ -339,7 +339,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-2.5 rounded bg-[#FF5A00] text-black font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                className="w-full min-h-[44px] py-2.5 rounded bg-[#FF5A00] text-black font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 <span>{isLoading ? 'Sending...' : 'Send Reset Link'}</span>
               </button>
@@ -347,7 +347,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveTab('signin')}
-                className="w-full text-center text-xs text-[#646669] hover:underline cursor-pointer pt-2"
+                className="w-full min-h-[44px] text-center text-xs text-[#646669] hover:underline cursor-pointer pt-2 flex items-center justify-center"
               >
                 Back to Sign In
               </button>

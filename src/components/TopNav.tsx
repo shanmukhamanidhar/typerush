@@ -15,7 +15,9 @@ import {
   User as UserIcon,
   LogIn,
   LogOut,
-  ChevronDown
+  ChevronDown,
+  Menu,
+  X
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { UserSettings, UserProfile } from '../types/typing';
@@ -53,11 +55,18 @@ export const TopNav: React.FC<TopNavProps> = ({
   isTestActive,
 }) => {
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement | null>(null);
 
   const toggleTheme = () => {
     onUpdateSettings({ theme: settings.theme === 'dark' ? 'light' : 'dark' });
   };
+
+  // Close menus on tab change or navigation
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+    setIsAccountMenuOpen(false);
+  }, [currentTab]);
 
   // Close account menu on click outside
   useEffect(() => {
@@ -82,12 +91,12 @@ export const TopNav: React.FC<TopNavProps> = ({
   ];
 
   return (
-    <header className="w-full flex items-center justify-between py-4 select-none transition-colors">
+    <header className="relative w-full flex items-center justify-between py-3 sm:py-4 select-none transition-colors border-b border-black/[0.04] dark:border-white/[0.04] md:border-none">
       
       {/* Left: TypeRush Wordmark & Geometric Logo on Same Baseline */}
       <div 
         onClick={() => !isTestActive && onSelectTab('home')}
-        className="flex items-center gap-2 cursor-pointer group shrink-0"
+        className="flex items-center gap-2 cursor-pointer group shrink-0 min-h-[44px]"
       >
         <TypeRushLogo size={18} className="w-[18px] h-[18px]" />
         <span className="font-mono text-lg font-bold tracking-tight text-[#111111] dark:text-[#F5F5F5] group-hover:text-[#FF5A00] transition-colors leading-none">
@@ -95,8 +104,8 @@ export const TopNav: React.FC<TopNavProps> = ({
         </span>
       </div>
 
-      {/* Center: Minimal Navigation Icons */}
-      <nav className="flex items-center gap-3 sm:gap-4">
+      {/* Center: Minimal Navigation Icons (Desktop >= 768px only) */}
+      <nav className="hidden md:flex items-center gap-3 sm:gap-4">
         {centerNavItems.map((item) => {
           const isActive = currentTab === item.id || (item.id === 'home' && currentTab === 'timetrial');
           return (
@@ -120,8 +129,8 @@ export const TopNav: React.FC<TopNavProps> = ({
         })}
       </nav>
 
-      {/* Right: Small Utility Controls */}
-      <div className="flex items-center gap-2.5 sm:gap-3 text-xs text-[#646669] dark:text-[#646669]">
+      {/* Right: Desktop Utility Controls (>= 768px only) */}
+      <div className="hidden md:flex items-center gap-2.5 sm:gap-3 text-xs text-[#646669] dark:text-[#646669]">
         
         {/* Command Palette */}
         <button
@@ -231,6 +240,128 @@ export const TopNav: React.FC<TopNavProps> = ({
         )}
 
       </div>
+
+      {/* Right: Mobile Header Controls (< 768px) */}
+      <div className="flex md:hidden items-center gap-1 text-xs text-[#646669] dark:text-[#646669]">
+        
+        {/* Theme Toggle Button */}
+        <button
+          onClick={toggleTheme}
+          className="min-w-[44px] min-h-[44px] p-2.5 flex items-center justify-center hover:text-[#111111] dark:hover:text-[#F5F5F5] transition-colors cursor-pointer rounded-lg active:bg-black/5 dark:active:bg-white/5"
+          title={settings.theme === 'dark' ? 'Light mode' : 'Dark mode'}
+          aria-label="Theme Toggle"
+        >
+          {settings.theme === 'dark' ? (
+            <Sun className="w-4 h-4 text-[#FF5A00]" />
+          ) : (
+            <Moon className="w-4 h-4 text-[#FF5A00]" />
+          )}
+        </button>
+
+        {/* User Quick Button or Sign In Button */}
+        {currentUser ? (
+          <button
+            onClick={() => onSelectTab('stats')}
+            className="min-h-[44px] px-2.5 flex items-center gap-1.5 rounded-lg border border-[#E5E5E5] dark:border-[#222222] text-[#111111] dark:text-[#F5F5F5] font-mono text-xs font-bold active:bg-black/5 dark:active:bg-white/5"
+            title="Account Statistics"
+          >
+            <UserIcon className="w-3.5 h-3.5 text-[#FF5A00]" />
+            <span className="max-w-[70px] truncate">{currentProfile?.username || 'user'}</span>
+          </button>
+        ) : (
+          <button
+            onClick={onOpenAuthModal}
+            className="min-h-[44px] px-2.5 flex items-center gap-1.5 rounded-lg border border-[#E5E5E5] dark:border-[#222222] text-[#111111] dark:text-[#F5F5F5] font-mono text-xs font-bold active:bg-black/5 dark:active:bg-white/5"
+            title="Sign In"
+          >
+            <LogIn className="w-3.5 h-3.5 text-[#FF5A00]" />
+            <span>Sign In</span>
+          </button>
+        )}
+
+        {/* Hamburger Mobile Menu Toggle Button */}
+        <button
+          onClick={() => setIsMobileMenuOpen(prev => !prev)}
+          className="min-w-[44px] min-h-[44px] p-2.5 flex items-center justify-center text-[#646669] dark:text-[#646669] hover:text-[#111111] dark:hover:text-[#F5F5F5] transition-colors cursor-pointer rounded-lg active:bg-black/5 dark:active:bg-white/5"
+          title="Toggle Navigation Menu"
+          aria-label="Toggle Navigation Menu"
+          aria-expanded={isMobileMenuOpen}
+        >
+          {isMobileMenuOpen ? (
+            <X className="w-5 h-5 text-[#FF5A00]" />
+          ) : (
+            <Menu className="w-5 h-5" />
+          )}
+        </button>
+      </div>
+
+      {/* Mobile Navigation Dropdown Drawer */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden absolute top-full left-0 right-0 z-50 bg-[#FFFFFF] dark:bg-[#0A0A0A] border-b border-[#E5E5E5] dark:border-[#222222] shadow-2xl animate-fadeIn p-4 font-mono select-none">
+          <div className="grid grid-cols-2 gap-2 mb-3">
+            {centerNavItems.map((item) => {
+              const isActive = currentTab === item.id || (item.id === 'home' && currentTab === 'timetrial');
+              return (
+                <button
+                  key={item.id}
+                  disabled={isTestActive}
+                  onClick={() => {
+                    onSelectTab(item.id);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`min-h-[44px] px-3 py-2 rounded-lg flex items-center gap-2 text-xs font-bold transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-[#FF5A00]/15 text-[#FF5A00] border border-[#FF5A00]/30'
+                      : isTestActive
+                      ? 'text-[#646669]/30 border border-transparent cursor-not-allowed'
+                      : 'border border-[#E5E5E5] dark:border-[#222222] text-[#646669] dark:text-[#A1A1A1] hover:text-[#111111] dark:hover:text-[#F5F5F5] active:bg-black/5 dark:active:bg-white/5'
+                  }`}
+                >
+                  <span className={isActive ? 'text-[#FF5A00]' : ''}>{item.icon}</span>
+                  <span className="capitalize truncate">{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="pt-3 border-t border-[#E5E5E5] dark:border-[#222222] flex flex-col gap-2">
+            <button
+              onClick={() => {
+                onOpenSettings();
+                setIsMobileMenuOpen(false);
+              }}
+              className="min-h-[44px] px-3 py-2.5 rounded-lg border border-[#E5E5E5] dark:border-[#222222] flex items-center gap-2.5 text-xs font-bold text-[#646669] dark:text-[#A1A1A1] hover:text-[#111111] dark:hover:text-[#F5F5F5] cursor-pointer"
+            >
+              <Settings className="w-4 h-4 text-[#FF5A00]" />
+              <span>Preferences & Settings</span>
+            </button>
+
+            <button
+              onClick={() => {
+                onOpenCommandPalette();
+                setIsMobileMenuOpen(false);
+              }}
+              className="min-h-[44px] px-3 py-2.5 rounded-lg border border-[#E5E5E5] dark:border-[#222222] flex items-center gap-2.5 text-xs font-bold text-[#646669] dark:text-[#A1A1A1] hover:text-[#111111] dark:hover:text-[#F5F5F5] cursor-pointer"
+            >
+              <Command className="w-4 h-4 text-[#FF5A00]" />
+              <span>Command Palette</span>
+            </button>
+
+            {currentUser && (
+              <button
+                onClick={() => {
+                  onSignOut();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="min-h-[44px] px-3 py-2.5 rounded-lg border border-[#FF3B5C]/30 bg-[#FF3B5C]/10 text-[#FF3B5C] flex items-center gap-2.5 text-xs font-bold cursor-pointer"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Sign Out ({currentProfile?.username})</span>
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
     </header>
   );

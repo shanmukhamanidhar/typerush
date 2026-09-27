@@ -21,6 +21,7 @@ interface TypingAreaProps {
   wordsProgressText?: string;
   pasteAttempted: boolean;
   onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onInput?: (e: React.FormEvent<HTMLInputElement>) => void;
   onPaste: (e: React.ClipboardEvent) => void;
   onRestart: () => void;
   onCompleteZen?: () => void;
@@ -46,6 +47,7 @@ export const TypingArea: React.FC<TypingAreaProps> = ({
   wordsProgressText,
   pasteAttempted,
   onKeyDown,
+  onInput,
   onPaste,
   onRestart,
   onCompleteZen,
@@ -113,12 +115,13 @@ export const TypingArea: React.FC<TypingAreaProps> = ({
             : 'bg-[#F7F7F7] dark:bg-[#0A0A0A] border border-[#E5E5E5] dark:border-[#2A2A2A]'
       }`}
     >
-      {/* Hidden real input handling keyboard events */}
+      {/* Hidden real input handling keyboard events with 16px size to prevent mobile zoom */}
       <input
         ref={inputRef}
         type="text"
-        value=""
-        onChange={() => {}} // Controlled by onKeyDown
+        defaultValue=""
+        onChange={() => {}}
+        onInput={onInput}
         onKeyDown={onKeyDown}
         onPaste={onPaste}
         onFocus={() => setIsFocused(true)}
@@ -129,7 +132,9 @@ export const TypingArea: React.FC<TypingAreaProps> = ({
         autoCorrect="off"
         autoCapitalize="off"
         spellCheck="false"
-        className="absolute inset-0 opacity-0 cursor-default pointer-events-none w-full h-full -z-10"
+        inputMode="text"
+        style={{ fontSize: '16px' }}
+        className="absolute inset-0 opacity-0 cursor-text z-0 w-full h-full pointer-events-auto"
         aria-label="Typing input area"
       />
 

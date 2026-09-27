@@ -783,6 +783,7 @@ export const App: React.FC = () => {
                   startFreshTest(mode, duration, difficulty, cat, wordCount);
                 }}
                 onKeyDown={typingEngine.handleKeyDown}
+                onInput={typingEngine.handleInputEvent}
                 onPaste={typingEngine.handlePaste}
                 onRestart={handleRestart}
                 quoteAuthor={quoteAuthor}
@@ -829,6 +830,7 @@ export const App: React.FC = () => {
                 startFreshTest('time', duration, difficulty, cat, wordCount);
               }}
               onKeyDown={typingEngine.handleKeyDown}
+              onInput={typingEngine.handleInputEvent}
               onPaste={typingEngine.handlePaste}
               onRestart={handleRestart}
               quoteAuthor={quoteAuthor}

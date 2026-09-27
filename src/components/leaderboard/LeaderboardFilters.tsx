@@ -38,17 +38,17 @@ export const LeaderboardFilters: React.FC<LeaderboardFiltersProps> = ({
   ];
 
   return (
-    <div className="w-full flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-4 border-b border-[#E5E5E5] dark:border-[#222222] font-mono text-xs">
+    <div className="w-full flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4 pb-4 border-b border-[#E5E5E5] dark:border-[#222222] font-mono text-xs overflow-x-auto no-scrollbar">
       
       {/* Timeframe Filter */}
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-1.5 shrink-0">
         <span className="text-[10px] text-[#646669] uppercase tracking-wider mr-1">Time:</span>
         <div className="flex items-center gap-1 bg-black/[0.03] dark:bg-white/[0.03] p-1 rounded-md">
           {timeframes.map(tf => (
             <button
               key={tf.id}
               onClick={() => onSelectTimeframe(tf.id)}
-              className={`px-2 py-1 rounded transition-colors cursor-pointer ${
+              className={`min-h-[34px] px-2.5 py-1 rounded transition-colors cursor-pointer flex items-center justify-center ${
                 timeframe === tf.id
                   ? 'bg-black/10 dark:bg-white/10 text-[#FF5A00] font-bold'
                   : 'text-[#646669] hover:text-[#111111] dark:hover:text-[#F5F5F5]'
@@ -61,14 +61,14 @@ export const LeaderboardFilters: React.FC<LeaderboardFiltersProps> = ({
       </div>
 
       {/* Test Type Filter */}
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-1.5 shrink-0">
         <span className="text-[10px] text-[#646669] uppercase tracking-wider mr-1">Mode:</span>
         <div className="flex items-center gap-1 bg-black/[0.03] dark:bg-white/[0.03] p-1 rounded-md">
           {testTypes.map(tt => (
             <button
               key={tt.id}
               onClick={() => onSelectTestType(tt.id)}
-              className={`px-2 py-1 rounded transition-colors cursor-pointer ${
+              className={`min-h-[34px] px-2.5 py-1 rounded transition-colors cursor-pointer flex items-center justify-center ${
                 testType === tt.id
                   ? 'bg-black/10 dark:bg-white/10 text-[#FF5A00] font-bold'
                   : 'text-[#646669] hover:text-[#111111] dark:hover:text-[#F5F5F5]'
@@ -81,14 +81,14 @@ export const LeaderboardFilters: React.FC<LeaderboardFiltersProps> = ({
       </div>
 
       {/* Language Filter */}
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-1.5 shrink-0">
         <span className="text-[10px] text-[#646669] uppercase tracking-wider mr-1">Lang:</span>
         <div className="flex items-center gap-1 bg-black/[0.03] dark:bg-white/[0.03] p-1 rounded-md">
           {languages.map(lang => (
             <button
               key={lang.id}
               onClick={() => onSelectLanguage(lang.id)}
-              className={`px-2 py-1 rounded transition-colors cursor-pointer ${
+              className={`min-h-[34px] px-2.5 py-1 rounded transition-colors cursor-pointer flex items-center justify-center ${
                 language === lang.id
                   ? 'bg-black/10 dark:bg-white/10 text-[#FF5A00] font-bold'
                   : 'text-[#646669] hover:text-[#111111] dark:hover:text-[#F5F5F5]'

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { MetricSnapshot } from '../types/typing';
 
 interface PerformanceGraphProps {
@@ -71,6 +71,8 @@ export const PerformanceGraph: React.FC<PerformanceGraphProps> = ({
 
     return list;
   }, [metrics, duration]);
+
+  const [hoveredPoint, setHoveredPoint] = useState<{ x: number; y: number; second: number; wpm: number; accuracy: number } | null>(null);
 
   const maxWpm = Math.max(50, ...safeMetrics.map((m) => Math.max(m.wpm || 0, m.rawWpm || 0))) + 15;
   const padding = 24;
@@ -185,16 +187,50 @@ export const PerformanceGraph: React.FC<PerformanceGraphProps> = ({
           />
         )}
 
-        {/* Data Points */}
+        {/* Data Points with Touch / Hover Hit Area */}
         {points.map((pt, i) => (
-          <circle
-            key={i}
-            cx={pt.x}
-            cy={pt.y}
-            r="3"
-            className="fill-[#FF5A00] stroke-[#F7F6F2] dark:stroke-[#080808] stroke-2"
-          />
+          <g key={i}>
+            <circle
+              cx={pt.x}
+              cy={pt.y}
+              r="14"
+              className="fill-transparent cursor-pointer"
+              onMouseEnter={() => setHoveredPoint(pt)}
+              onMouseLeave={() => setHoveredPoint(null)}
+              onTouchStart={() => setHoveredPoint(pt)}
+            />
+            <circle
+              cx={pt.x}
+              cy={pt.y}
+              r={hoveredPoint?.second === pt.second ? '5' : '3'}
+              className="fill-[#FF5A00] stroke-[#F7F6F2] dark:stroke-[#080808] stroke-2 pointer-events-none transition-all"
+            />
+          </g>
         ))}
+
+        {/* Floating Tooltip */}
+        {hoveredPoint && (
+          <g className="pointer-events-none">
+            <rect
+              x={Math.max(padding, Math.min(graphWidth - padding - 100, hoveredPoint.x - 50))}
+              y={Math.max(6, hoveredPoint.y - 30)}
+              width="100"
+              height="22"
+              rx="4"
+              className="fill-black/95 dark:fill-zinc-900/95 stroke"
+              strokeWidth="1"
+              stroke="#FF5A00"
+            />
+            <text
+              x={Math.max(padding, Math.min(graphWidth - padding - 100, hoveredPoint.x - 50)) + 50}
+              y={Math.max(6, hoveredPoint.y - 30) + 14}
+              textAnchor="middle"
+              className="text-[9px] fill-[#F5F5F5] font-mono font-bold"
+            >
+              {hoveredPoint.second}s: {hoveredPoint.wpm} wpm
+            </text>
+          </g>
+        )}
       </svg>
 
       {/* Legend */}
